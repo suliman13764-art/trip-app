@@ -26,6 +26,15 @@
   - Only Owner/Admin can create users and **soft deactivate/reactivate** users.
   - Regular users can run analyses but cannot manage accounts.
   - Seed a **default initial Owner/Admin** account for internal setup/testing.
+- **WebTrack settlement + explanation layer (NEW, implemented)**
+  - Extract **Køretid by/land** + **Ventetid by/land** from the **final V.LØBE SLUT summary only**.
+  - Compute settlement metrics:
+    - **Total driving time** = Køretid by + Køretid land
+    - **Total waiting time** = Ventetid by + Ventetid land
+    - **Afregnet min.** = driving total + waiting total
+    - **Ønsket afregnet** = system-correct total minutes from segment/private-trip logic
+    - **Difference** = Ønsket afregnet − Afregnet min.
+  - Provide **delay identification** per stop (planned WebTrack times vs inferred actual GPS timing) and a main delay explanation.
 
 ---
 
@@ -86,7 +95,7 @@
 
 #### Implemented behavior
 - Backend `/api/analyze` accepts `private_trip_overrides` and applies them as overlays.
-- Segment splitting uses **WebTrack completion anchors** (AFLEV planned completion time mapped to same date) to end the segment before private trip.
+- Segment splitting uses **WebTrack completion anchors** (AFLEV completion timestamps) to end the segment before private trip.
 - Resume time after private trip is inferred using **both**:
   - first GPS movement after private trip end
   - first meaningful WebTrack event after private trip end
@@ -131,39 +140,117 @@
   - Soft deactivate/reactivate.
 - Default seeded Owner/Admin account:
   - Seeded from backend env.
-  - Documented in `/app/memory/test_credentials.md`.
+  - Login form does **not** auto-fill password.
 
 #### Status
 - ✅ Implemented and verified via automated tests (Testing Agent iteration 2).
 
 ---
 
+### Phase 5 — Owner/Admin Credential Update ✅ IMPLEMENTED + VERIFIED
+**Goal:** Replace initial owner/admin account with requested credentials.
+
+**Implemented**
+- Seed defaults updated to:
+  - Username: **ahabus**
+  - Password: **71897382**
+- Old `owner` user soft-deactivated.
+- Login form password field is **not auto-filled**.
+
+**Status**
+- ✅ Verified via API login and UI checks.
+
+---
+
+### Phase 6 — WebTrack Final Summary Extraction + Settlement Metrics + Delay Analysis ✅ IMPLEMENTED + TESTED
+**Goal:** Strengthen correction requests by adding settlement facts and an explanation of what happened during the run.
+
+#### Requirements implemented
+1. **Driving and waiting time from final summary**
+   - Extracted only from the **final V.LØBE SLUT** block:
+     - Køretid by, Køretid land
+     - Ventetid by, Ventetid land
+   - Computed:
+     - Total driving = by + land
+     - Total waiting = by + land
+     - Afregnet min. = total driving + total waiting
+
+2. **Difference calculation**
+   - Ønsket afregnet = system-correct total minutes (segment logic + private trips)
+   - Difference = Ønsket afregnet − Afregnet min.
+
+3. **Delay identification**
+   - Baseline: **planned WebTrack stop times** vs **inferred actual GPS stop timing/movement**.
+   - Produces:
+     - stop number
+     - stop type (BAG/AFLEV)
+     - planned time
+     - inferred actual time
+     - estimated delay minutes
+     - reason heuristic (waiting time / traffic / sequence gap)
+     - confidence indicator
+
+4. **Visibility**
+   - Shown in both:
+     - Dashboard (settlement cards + delay panel)
+     - Danish correction text (settlement lines + main delay explanation)
+
+#### Verified on sample (Testing Agent iteration 3)
+- Extracted final summary:
+  - Køretid by: **5**
+  - Køretid land: **162**
+  - Ventetid by: **14**
+  - Ventetid land: **5**
+- Computed settlement:
+  - Total driving: **167**
+  - Total waiting: **19**
+  - Afregnet min.: **186**
+  - Ønsket afregnet: **182**
+  - Difference: **-4**
+- Main delay:
+  - Stop **50** (BAG), **9 min**, reason: **waiting time at stop**
+
+#### Status
+- ✅ Implemented and validated by automated testing (Testing Agent iteration 3).
+
+---
+
 ## 3) Next Actions (Post-V1 / Hardening)
-Now that Phase 3 and Phase 4 are delivered, the next work should focus on **business-rule validation with real private-trip days** and operational hardening.
+Now that Phases 3–6 are delivered, the next work should focus on **validation with more real days**, improved explainability, and hardening.
 
-1. **Collect real private-trip sample(s) for validation**
-   - Provide 1–3 anonymized days where private trip intervals are known.
-   - Confirm expected segment boundaries:
-     - last completed order timestamp before private trip
-     - resume timestamp after private trip
+1. **Collect more real sample days for validation**
+   - At least 3–10 anonymized days:
+     - days with known private trips
+     - days with known delays (where dispatch knows the cause)
+     - days with multiple segments
+   - For each day, confirm expected:
+     - segment boundaries
+     - which stop had delay
+     - expected driving/waiting totals (from V.LØBE SLUT)
 
-2. **Private-trip detection improvements (optional, data-driven)**
-   - Add “suggested private trip” candidates based on:
-     - long GPS movement windows with no meaningful WebTrack events
-     - known non-work locations (if provided)
-   - Keep manual confirmation as the safe default.
+2. **Harden delay heuristics (recommended)**
+   - Improve stop-to-GPS matching:
+     - better address normalization
+     - alternate matching using nearest time + low speed + dwell
+     - incorporate distance-to-home / route shape
+   - Refine reason classification:
+     - traffic vs waiting vs sequencing
+     - add thresholds configurable per vehicle type
+   - Add “uncertainty” messaging when confidence is low.
 
-3. **Audit & reporting enhancements**
-   - Add explicit segment-level explanation fields:
-     - why the end boundary was cut (private overlay vs home return)
-     - which completion event was used
-   - Optional: export PDF summary.
+3. **Expand WebTrack parsing coverage**
+   - Additional report formats and Excel headerless variations.
+   - More message patterns (pickup vs drop-off naming).
 
 4. **Security hardening (recommended for production)**
    - Move JWT secret + default admin password to secure deployment config.
-   - Add “change password” flow for the seeded owner account.
-   - Add basic login rate limiting.
-   - Tighten CORS origins (replace `*` with internal domains) when deployment target is known.
+   - Add password change flow.
+   - Add login rate limiting.
+   - Tighten CORS origins (replace `*` with internal domains).
+
+5. **Audit & exports (optional)**
+   - Export a PDF summary (map snapshot + segments + settlement + delay + correction text).
+   - Add admin audit log viewer (create/deactivate users).
 
 ---
 
@@ -186,3 +273,9 @@ Now that Phase 3 and Phase 4 are delivered, the next work should focus on **busi
 - ✅ Regular users cannot manage accounts and cannot see admin controls.
 - ✅ Deactivated users cannot log in.
 - ✅ Default Owner/Admin account is seeded and documented.
+
+### Phase 6 success (Settlement + delay explanation) ✅
+- ✅ V.LØBE SLUT summary extraction for driving/waiting is used as the only source for Afregnet min.
+- ✅ Ønsket afregnet computed from system logic (segments + private trips).
+- ✅ Difference shown clearly in dashboard and Danish correction text.
+- ✅ Delay analysis identifies a stop, delay minutes, and reason with confidence indicator.
