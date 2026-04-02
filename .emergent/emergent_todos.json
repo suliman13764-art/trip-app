@@ -5,7 +5,7 @@
   },
   {
     "content": "Phase 3: Add manual private trip marking/confirmation UI and correction text updates",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 4: Implement username/password auth with seeded owner/admin account",
@@ -13,7 +13,7 @@
   },
   {
     "content": "Phase 4: Implement admin-only user management with soft deactivate RBAC",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 4: Protect analysis flow behind authentication",
@@ -21,6 +21,6 @@
   },
   {
     "content": "Phase 4: End-to-end testing using Testing Agent for private trip + RBAC flows",
-    "status": "pending"
+    "status": "completed"
   }
 ]

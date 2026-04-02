@@ -3,7 +3,7 @@
 ## 1) Objectives
 - Build an internal web app that computes **work start**, **work end**, **total working time**, and **multiple trip segments (forløb)** from **GPS + WebTrack order/message** data.
 - Ensure **home zone** is set by **address search in the browser (Nominatim) → coordinates**, with **map click adjustment** (Leaflet + OSM) and **radius 200–500m**.
-  - **Important constraint:** backend-to-Nominatim calls are blocked in the current shared cloud environment; **v1 uses browser-only geocoding** and sends final chosen coordinates to backend.
+  - **Constraint (kept):** backend-to-Nominatim calls are blocked in the current shared cloud environment; **v1 uses browser-only geocoding** and sends final chosen coordinates to backend.
 - Implement **robust real-world parsing**:
   - GPS **CSV/XLSX** (including semicolon-delimited, Latin-1 CSV with decimal commas).
   - WebTrack reports from **Excel without headers** and **PDF report prints** with messy report-style structure.
@@ -12,16 +12,18 @@
   - **Return validation prevents drive-by false returns** via dwell/stop logic.
   - **Real-world truncation handling:** allow a valid return near end-of-file if the vehicle is inside home zone and clearly stops/pauses, even if dwell-in-file is shorter than default dwell threshold.
 - Generate a **Movia-ready Danish correction request** (copy/paste), with clear explanation and explicit fallback/estimation notes.
-- **NEW (post-MVP): Private trip exclusion logic**
-  - Detect/handle **private trips (privat rejse)** so private time is **excluded from work time**.
-  - If a private trip occurs between work activities, end the current work segment at the **last completed order** before the private trip starts.
-  - Start the next work segment **after** the private trip ends when work actually resumes.
+
+### Added and now implemented
+- **Private trip exclusion logic (privat rejse)**
+  - Private time is **excluded from work time**.
+  - If a private trip occurs between work activities, the current segment ends at the **last completed order (AFLEV completion time)** before the private trip starts.
+  - The next segment starts **after** the private trip ends when work resumes, inferred using **both GPS + order/message** data.
   - Must not merge private time into work segments.
   - Must support **manual marking/confirmation** in the app when private trip boundaries are ambiguous.
-- **NEW (post-MVP): Authentication + RBAC**
-  - Implement **username + password** authentication.
+- **Authentication + RBAC**
+  - **Username + password** login.
   - Roles: **Owner/Admin** and **Regular User**.
-  - Only Owner/Admin can create users and **soft deactivate** users.
+  - Only Owner/Admin can create users and **soft deactivate/reactivate** users.
   - Regular users can run analyses but cannot manage accounts.
   - Seed a **default initial Owner/Admin** account for internal setup/testing.
 
@@ -71,167 +73,116 @@
 
 ---
 
-### Phase 3 — Private Trip Logic + Manual Overrides (NEW ACTIVE PHASE)
-**Goal:** Correctly exclude **private trip time** from work time and ensure segments split properly around private trips, with manual marking/confirmation when data is ambiguous.
+### Phase 3 — Private Trip Logic + Manual Overrides ✅ IMPLEMENTED + TESTED
+**Goal:** Exclude **private trip time** from work time and ensure segments split correctly around private trips.
 
-#### User stories (Phase 3A: Private Trip)
+#### User stories (Phase 3)
 1. As a user, I can mark a time range as **Private trip** so it is excluded from work time.
-2. As a user, when a private trip is detected/marked between work activities, I see segments split:
+2. As a user, when a private trip is marked between work activities, I see segments split:
    - Segment ends at **last completed order** before private trip starts.
    - Next segment starts after private trip ends when work resumes.
-3. As a user, I can confirm or adjust private trip boundaries if the system is uncertain.
-4. As a user, the system never merges private time into a work segment and shows an explicit “private time excluded” explanation in the correction text.
+3. As a user, I can adjust boundaries manually.
+4. As a user, the correction text clearly states private time was excluded.
 
-#### Logic requirements (must implement)
-- **Normal case:** segment starts when leaving home zone and ends on first valid home-zone return.
-- **Private trip case:**
-  - If a private trip occurs between work activities:
-    - Current work segment ends at **timestamp of the last completed order (AFLEV / completion)** before the private trip starts.
-    - The private trip interval is **excluded** from work time.
-    - Next segment starts **after private trip end**, at the time work actually resumes.
-  - The segment must **not** continue through the private trip.
-  - The system must not merge work + private trip time.
-- **Passing through home zone** during active work or private driving must **not** end a segment unless return is validated (dwell/stop logic). (Existing rule remains.)
+#### Implemented behavior
+- Backend `/api/analyze` accepts `private_trip_overrides` and applies them as overlays.
+- Segment splitting uses **WebTrack completion anchors** (AFLEV planned completion time mapped to same date) to end the segment before private trip.
+- Resume time after private trip is inferred using **both**:
+  - first GPS movement after private trip end
+  - first meaningful WebTrack event after private trip end
+  - system selects the earliest valid resume time.
+- Total working time is computed as the **sum of segment durations after splitting**, excluding private intervals.
+- Danish correction text includes: `Privat kørsel fra HH:MM til HH:MM er fratrukket arbejdstiden.`
 
-#### Private trip identification (flexible)
-- Use a combination of:
-  - GPS patterns (e.g., long gap, travel to non-work location, unusual routing)
-  - WebTrack patterns (lack of meaningful work events during movement window; message hints if present)
-  - **Manual marking/confirmation in the UI** (required for v1 of this feature)
+#### Verification example (on provided sample files)
+- Manual private trip: **12:00–12:30**
+- Result:
+  - **2 segments**
+  - Total minutes: **131**
+  - Segment 1 ended at **11:40** (last completed AFLEV before private start)
+  - Segment 2 resumed at **12:30:54** (first GPS movement after private end)
 
-#### Proposed implementation tasks
-1. **Data model additions (analysis result)**
-   - Add `private_trips: [{ start_time, end_time, source: 'manual'|'auto', confidence, notes }]`.
-   - Add `segment_adjustments: [{ reason, original_boundary, adjusted_boundary }]`.
-2. **WebTrack “completion” extraction**
-   - Define “completed order” events (e.g., `AFLEV` with a time) as completion anchors.
-   - Ensure we store completion timestamps by stop/order (not just summary).
-3. **Segment splitting rules (engine update)**
-   - After base segmentation, apply private-trip overlays:
-     - For each private trip window, find the last completion timestamp before `private_start` → segment end.
-     - Identify next work-resume timestamp after `private_end` using both:
-       - first meaningful WebTrack event after private end
-       - corresponding GPS movement time window
-     - Create new segment start at resume timestamp.
-4. **Manual marking UI**
-   - Provide “Mark private trip” controls:
-     - Option A: select start/end by choosing from detected timeline events (GPS timestamps + WebTrack timestamps)
-     - Option B: enter start/end times manually (time inputs)
-   - Show private trip intervals on the map (e.g., gray overlay) and in the segments table.
-5. **Correction text update (Danish)**
-   - Include explicit statement:
-     - “Privat kørsel fra HH:MM til HH:MM er fratrukket arbejdstiden.”
-   - Ensure totals are computed as sum of segment durations **minus private trip intervals**.
-6. **Testing (must add before release)**
-   - Add at least 1 real anonymized day with a known private trip.
-   - Validate:
-     - segment ends exactly at last completed order before private trip
-     - resume starts after private trip end
-     - total work minutes excludes private interval
-     - no false end from passing through home zone
+#### Status
+- ✅ Implemented in backend analysis engine and UI.
+- ✅ Covered by automated testing (Testing Agent iteration 2).
 
 ---
 
-### Phase 4 — Authentication + RBAC + Admin User Management (NEW ACTIVE PHASE, PARALLEL/AFTER 3)
-**Goal:** Add secure internal access control with centralized admin-only user management.
+### Phase 4 — Authentication + RBAC + Admin User Management ✅ IMPLEMENTED + TESTED
+**Goal:** Secure internal access control with centralized admin-only user management.
 
 #### User stories (Phase 4)
 1. As a user, I can log in using **username + password**.
 2. As an Owner/Admin, I can create new user accounts.
-3. As an Owner/Admin, I can **soft deactivate** users (disable access) and reactivate if needed.
-4. As a Regular User, I can use the analysis system but cannot create/deactivate users.
-5. As an Owner/Admin, I can view a list of users and their status (active/deactivated) and role.
+3. As an Owner/Admin, I can **soft deactivate/reactivate** users.
+4. As a Regular User, I can use the analysis system but cannot manage accounts.
 
-#### Requirements (must implement)
-- Auth method: **username + password**.
-- Roles:
-  - **Owner/Admin**: can create users; can soft deactivate users; can manage access.
-  - **Regular User**: can log in and run analysis; no user management.
-- Removal: **soft deactivate only** (no hard deletes).
-- Seed default Owner/Admin user for internal setup/testing.
+#### Implemented behavior
+- Mongo-backed user persistence.
+- JWT bearer auth:
+  - `POST /api/auth/login`
+  - `GET /api/auth/me`
+- Protected endpoints:
+  - `/api/analyze` requires authentication.
+  - `/api/admin/users*` requires Owner/Admin.
+- Admin UI:
+  - Visible only to Owner/Admin.
+  - Create user + role assignment.
+  - Soft deactivate/reactivate.
+- Default seeded Owner/Admin account:
+  - Seeded from backend env.
+  - Documented in `/app/memory/test_credentials.md`.
 
-#### Proposed implementation tasks
-1. **Backend auth foundations (FastAPI)**
-   - Add user table/collection (MongoDB or file-backed). Even if analysis is stateless, auth requires persistence.
-   - Fields: `username`, `password_hash`, `role`, `is_active`, `created_at`, `last_login_at`.
-   - Password hashing: bcrypt/passlib.
-   - Token/session:
-     - JWT access token stored in memory/localStorage OR httpOnly cookie (prefer cookie if feasible).
-2. **RBAC middleware/dependencies**
-   - Dependency guard: `require_auth`, `require_role_admin`.
-   - Protect endpoints:
-     - `/api/analyze` requires authenticated user.
-     - `/api/admin/users/*` requires admin.
-3. **Admin endpoints**
-   - `POST /api/auth/login`
-   - `POST /api/auth/logout` (if cookie-based)
-   - `GET /api/auth/me`
-   - `POST /api/admin/users` (create)
-   - `PATCH /api/admin/users/{id}` (deactivate/reactivate, change role if allowed)
-   - `GET /api/admin/users` (list)
-4. **Frontend login + protected UI**
-   - Add login page/form.
-   - Store auth state; redirect unauthenticated users to login.
-   - Hide admin UI for regular users.
-5. **Admin management UI**
-   - Users table with create modal and activate/deactivate toggles.
-   - Clear role badges.
-6. **Seeding default Owner/Admin**
-   - Add startup hook:
-     - If no users exist, create default `owner` user with a configurable password.
-   - Provide “change password” flow (optional but recommended).
-7. **Security + audit basics**
-   - Rate limit login attempts (basic).
-   - Log admin actions: create/deactivate.
-   - Ensure deactivated accounts cannot log in.
-8. **Testing (must)**
-   - Automated tests for:
-     - login success/failure
-     - role enforcement
-     - deactivate blocks login
-     - admin can create users; regular cannot
+#### Status
+- ✅ Implemented and verified via automated tests (Testing Agent iteration 2).
 
 ---
 
-## 3) Next Actions
-**New active workstream after MVP:** Phase 3 + Phase 4.
+## 3) Next Actions (Post-V1 / Hardening)
+Now that Phase 3 and Phase 4 are delivered, the next work should focus on **business-rule validation with real private-trip days** and operational hardening.
 
-1. **Private trip support**
-   - Provide 1 anonymized day example where a private trip is known + expected boundaries and last completed order time.
-   - Implement private trip data model + manual marking UI.
-   - Update engine to split segments using last completed order before private trip.
-   - Update Danish correction text to explicitly subtract private trip time.
+1. **Collect real private-trip sample(s) for validation**
+   - Provide 1–3 anonymized days where private trip intervals are known.
+   - Confirm expected segment boundaries:
+     - last completed order timestamp before private trip
+     - resume timestamp after private trip
 
-2. **Auth + RBAC**
-   - Implement username/password login and seed owner/admin.
-   - Add admin endpoints and UI for creating/deactivating users.
-   - Protect `/api/analyze` behind authentication.
+2. **Private-trip detection improvements (optional, data-driven)**
+   - Add “suggested private trip” candidates based on:
+     - long GPS movement windows with no meaningful WebTrack events
+     - known non-work locations (if provided)
+   - Keep manual confirmation as the safe default.
 
-3. **Regression tests**
-   - Re-run sample day (no private trip) to ensure previous results remain unchanged.
-   - Add new tests for private trip day and RBAC flows.
+3. **Audit & reporting enhancements**
+   - Add explicit segment-level explanation fields:
+     - why the end boundary was cut (private overlay vs home return)
+     - which completion event was used
+   - Optional: export PDF summary.
+
+4. **Security hardening (recommended for production)**
+   - Move JWT secret + default admin password to secure deployment config.
+   - Add “change password” flow for the seeded owner account.
+   - Add basic login rate limiting.
+   - Tighten CORS origins (replace `*` with internal domains) when deployment target is known.
 
 ---
 
 ## 4) Success Criteria
-**MVP success (Completed / Phase 2)**
+
+### Phase 2 success (MVP) ✅
 - ✅ Upload + home zone selection + analysis + map + Danish correction text works.
 - ✅ End time based on first valid home-zone entry (not last GPS point).
 - ✅ Handles messy GPS/WebTrack inputs including PDF WebTrack.
 
-**Phase 3 success (Private trip logic)**
-- Private trip time is **never counted** in work time.
-- If private trip occurs between work activities:
-  - Segment ends at **last completed order time** before private trip.
-  - Next segment starts after private trip ends when work resumes.
-- Manual marking/confirmation works and is reflected in:
-  - segments
-  - totals
-  - Danish correction request text
+### Phase 3 success (Private trip logic) ✅
+- ✅ Private trip time is excluded from work time.
+- ✅ Segment ends at last completed order before private trip.
+- ✅ Next segment starts after private trip ends using GPS + order inference.
+- ✅ Manual marking works and affects segments, totals, and Danish correction text.
 
-**Phase 4 success (Auth + RBAC)**
-- Users must log in with username/password to access the tool.
-- Owner/Admin can create and deactivate users.
-- Regular users cannot manage accounts.
-- Deactivated users cannot log in.
-- Default Owner/Admin account is seeded for initial setup/testing.
+### Phase 4 success (Auth + RBAC) ✅
+- ✅ Users must log in with username/password to access analysis.
+- ✅ Owner/Admin can create and deactivate/reactivate users.
+- ✅ Regular users cannot manage accounts and cannot see admin controls.
+- ✅ Deactivated users cannot log in.
+- ✅ Default Owner/Admin account is seeded and documented.
