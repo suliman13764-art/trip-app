@@ -8,17 +8,22 @@ import {
   Copy,
   FileText,
   LoaderCircle,
+  LogOut,
   MapPin,
   RefreshCcw,
   ShieldCheck,
+  UserCog,
 } from "lucide-react";
 
 import "leaflet/dist/leaflet.css";
 import "@/App.css";
+import { AdminUserManagement } from "@/components/AdminUserManagement";
 import { CorrectionTextPanel } from "@/components/CorrectionTextPanel";
 import { FileDropzoneCard } from "@/components/FileDropzoneCard";
 import { HomeZoneControls } from "@/components/HomeZoneControls";
 import { LeafletMapPanel } from "@/components/LeafletMapPanel";
+import { LoginScreen } from "@/components/LoginScreen";
+import { PrivateTripManager } from "@/components/PrivateTripManager";
 import { QualityDebugPanel } from "@/components/QualityDebugPanel";
 import { ResultsKPIGrid } from "@/components/ResultsKPIGrid";
 import { SegmentsTable } from "@/components/SegmentsTable";
@@ -33,6 +38,7 @@ import { Toaster, toast } from "@/components/ui/sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const TOKEN_KEY = "trip-segment-auth-token";
 
 const previewCsvFile = (file) =>
   new Promise((resolve) => {
@@ -71,9 +77,7 @@ const searchNominatim = async (query) => {
 
   const response = await fetch(url.toString(), {
     method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
+    headers: { Accept: "application/json" },
   });
 
   if (!response.ok) {
@@ -83,7 +87,19 @@ const searchNominatim = async (query) => {
   return response.json();
 };
 
+const initialPrivateTripForm = [];
+
 function App() {
+  const [authToken, setAuthToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [loginUsername, setLoginUsername] = useState("owner");
+  const [loginPassword, setLoginPassword] = useState("Owner123!");
+  const [authError, setAuthError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminBusy, setAdminBusy] = useState(false);
+
   const [activeStep, setActiveStep] = useState("upload");
   const [gpsFile, setGpsFile] = useState(null);
   const [webtrackFile, setWebtrackFile] = useState(null);
@@ -100,7 +116,54 @@ function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState("");
   const [highlightedSegmentIndex, setHighlightedSegmentIndex] = useState(null);
+  const [privateTrips, setPrivateTrips] = useState(initialPrivateTripForm);
   const resultsRef = useRef(null);
+
+  const authHeaders = useMemo(
+    () => (authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    [authToken]
+  );
+
+  const isAdmin = currentUser?.role === "owner" || currentUser?.role === "admin";
+
+  const fetchCurrentUser = async (token) => {
+    const response = await axios.get(`${API}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.user;
+  };
+
+  const loadUsers = async () => {
+    if (!isAdmin) return;
+    const response = await axios.get(`${API}/admin/users`, { headers: authHeaders });
+    setAdminUsers(response.data.users || []);
+  };
+
+  useEffect(() => {
+    const bootstrapAuth = async () => {
+      if (!authToken) {
+        setAuthLoading(false);
+        return;
+      }
+      try {
+        const user = await fetchCurrentUser(authToken);
+        setCurrentUser(user);
+      } catch (error) {
+        localStorage.removeItem(TOKEN_KEY);
+        setAuthToken("");
+        setCurrentUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+    bootstrapAuth();
+  }, [authToken]);
+
+  useEffect(() => {
+    if (isAdmin && authToken) {
+      loadUsers();
+    }
+  }, [isAdmin, authToken]);
 
   useEffect(() => {
     if (gpsFile && gpsFile.name.toLowerCase().endsWith(".csv")) {
@@ -117,6 +180,71 @@ function App() {
       setWebtrackPreview(null);
     }
   }, [webtrackFile]);
+
+  const resetAnalysisState = () => {
+    setAnalysis(null);
+    setAnalysisError("");
+    setHighlightedSegmentIndex(null);
+  };
+
+  const handleLogin = async () => {
+    setIsLoggingIn(true);
+    setAuthError("");
+    try {
+      const response = await axios.post(`${API}/auth/login`, {
+        username: loginUsername,
+        password: loginPassword,
+      });
+      localStorage.setItem(TOKEN_KEY, response.data.access_token);
+      setAuthToken(response.data.access_token);
+      setCurrentUser(response.data.user);
+      toast.success("Logged in successfully.");
+    } catch (error) {
+      setAuthError(error?.response?.data?.detail || "Login failed.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    setAuthToken("");
+    setCurrentUser(null);
+    setAdminUsers([]);
+    setAnalysis(null);
+    setPrivateTrips(initialPrivateTripForm);
+    toast.success("Logged out.");
+  };
+
+  const handleCreateUser = async (payload) => {
+    setAdminBusy(true);
+    try {
+      await axios.post(`${API}/admin/users`, payload, { headers: authHeaders });
+      toast.success(`User ${payload.username} created.`);
+      await loadUsers();
+    } catch (error) {
+      toast.error(error?.response?.data?.detail || "Could not create user.");
+    } finally {
+      setAdminBusy(false);
+    }
+  };
+
+  const handleToggleUser = async (user) => {
+    setAdminBusy(true);
+    try {
+      await axios.patch(
+        `${API}/admin/users/${user.id}`,
+        { is_active: !user.is_active },
+        { headers: authHeaders }
+      );
+      toast.success(`${user.username} ${user.is_active ? "deactivated" : "reactivated"}.`);
+      await loadUsers();
+    } catch (error) {
+      toast.error(error?.response?.data?.detail || "Could not update user.");
+    } finally {
+      setAdminBusy(false);
+    }
+  };
 
   const stepConfig = useMemo(
     () => [
@@ -154,8 +282,8 @@ function App() {
 
   const handleGpsFileChange = (file) => {
     setGpsFile(file);
-    setAnalysis(null);
-    setAnalysisError("");
+    setPrivateTrips(initialPrivateTripForm);
+    resetAnalysisState();
     if (file) {
       toast.success("GPS file attached.");
       setActiveStep(webtrackFile ? "home" : "upload");
@@ -164,8 +292,8 @@ function App() {
 
   const handleWebtrackFileChange = (file) => {
     setWebtrackFile(file);
-    setAnalysis(null);
-    setAnalysisError("");
+    setPrivateTrips(initialPrivateTripForm);
+    resetAnalysisState();
     if (file) {
       toast.success("WebTrack file attached.");
       setActiveStep(gpsFile ? "home" : "upload");
@@ -181,11 +309,7 @@ function App() {
     try {
       const results = await searchNominatim(addressQuery.trim());
       setAddressResults(results);
-      if (results.length) {
-        toast.success("Address candidates loaded.");
-      } else {
-        toast.error("No address matches found. Try clicking the map instead.");
-      }
+      results.length ? toast.success("Address candidates loaded.") : toast.error("No address matches found. Try clicking the map instead.");
     } catch (error) {
       toast.error(error.message || "Address search failed.");
     } finally {
@@ -194,13 +318,12 @@ function App() {
   };
 
   const handleSelectAddress = (result) => {
-    const nextHome = {
+    setSelectedHome({
       lat: Number(result.lat),
       lon: Number(result.lon),
       label: result.display_name,
       source: "browser-nominatim",
-    };
-    setSelectedHome(nextHome);
+    });
     setActiveStep("parameters");
     toast.success("Home zone address selected.");
   };
@@ -214,6 +337,9 @@ function App() {
     formData.append("radius_m", radius);
     formData.append("dwell_minutes", dwellMinutes);
     formData.append("stable_points", stablePoints);
+    if (privateTrips.length) {
+      formData.append("private_trip_overrides", JSON.stringify(privateTrips));
+    }
     if (orderCoordinates?.lat && orderCoordinates?.lon) {
       formData.append("last_order_lat", orderCoordinates.lat);
       formData.append("last_order_lon", orderCoordinates.lon);
@@ -224,7 +350,10 @@ function App() {
   const performAnalysis = async (orderCoordinates = null, allowOrderRetry = true) => {
     const formData = buildFormData(orderCoordinates);
     const response = await axios.post(`${API}/analyze`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: {
+        ...authHeaders,
+        "Content-Type": "multipart/form-data",
+      },
     });
     const result = response.data;
 
@@ -271,6 +400,9 @@ function App() {
       toast.success("Analysis complete.");
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
     } catch (error) {
+      if (error?.response?.status === 401) {
+        handleLogout();
+      }
       const message = error?.response?.data?.detail || error.message || "Analysis failed.";
       setAnalysisError(message);
       toast.error(message);
@@ -294,6 +426,37 @@ function App() {
     toast.success("Segment summary copied.");
   };
 
+  if (authLoading) {
+    return (
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="flex items-center gap-3 rounded-2xl border bg-card px-5 py-4 shadow-sm">
+            <LoaderCircle className="h-5 w-5 animate-spin text-primary" />
+            <span className="text-sm font-medium">Checking your session…</span>
+          </div>
+          <Toaster richColors position="top-right" />
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <LoginScreen
+          username={loginUsername}
+          password={loginPassword}
+          onUsernameChange={setLoginUsername}
+          onPasswordChange={setLoginPassword}
+          onSubmit={handleLogin}
+          error={authError}
+          isSubmitting={isLoggingIn}
+        />
+        <Toaster richColors position="top-right" />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <div className="AppShell">
@@ -308,20 +471,30 @@ function App() {
                     Internal operations tool
                   </Badge>
                   <Badge variant="secondary" data-testid="timezone-label">CET/CEST local time</Badge>
+                  <Badge variant="outline">Private-trip aware</Badge>
                 </div>
                 <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Trip Segment Correction Workspace</h1>
                 <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                  Upload messy GPS and WebTrack files, set the home zone, and generate a Movia-ready Danish correction request with auditable trip logic.
+                  Upload messy GPS and WebTrack files, set the home zone, exclude private trips when needed, and generate a Movia-ready Danish correction request with auditable trip logic.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[320px]">
+              <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[360px]">
                 <div className="rounded-2xl border bg-card p-4 shadow-sm">
-                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Logic priority</p>
-                  <p className="mt-2 text-sm font-semibold">End time = first valid home-zone entry</p>
+                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Signed in as</p>
+                  <p className="mt-2 text-sm font-semibold">{currentUser.username}</p>
+                  <p className="text-xs text-muted-foreground">{isAdmin ? "Owner/Admin" : "Regular User"}</p>
                 </div>
                 <div className="rounded-2xl border bg-card p-4 shadow-sm">
-                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Reliability rule</p>
-                  <p className="mt-2 text-sm font-semibold">Drive-by passes never count as a return</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Session</p>
+                      <p className="mt-2 text-sm font-semibold">Authenticated access enabled</p>
+                    </div>
+                    <Button type="button" variant="outline" onClick={handleLogout} data-testid="logout-button">
+                      <LogOut className="h-4 w-4" />
+                      Log out
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -329,6 +502,12 @@ function App() {
         </header>
 
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          {isAdmin ? (
+            <div className="mb-6">
+              <AdminUserManagement users={adminUsers} onCreateUser={handleCreateUser} onToggleUser={handleToggleUser} loading={adminBusy} />
+            </div>
+          ) : null}
+
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="space-y-6 lg:col-span-5">
               <Card className="border-border/90 shadow-sm">
@@ -397,6 +576,7 @@ function App() {
                               <li>• Return dwell: {dwellMinutes} minutes</li>
                               <li>• Stable inside/outside streak: {stablePoints} points</li>
                               <li>• Timezone reference: CET/CEST local time</li>
+                              <li>• Manual private trips can split segments after first analysis</li>
                             </ul>
                           </div>
                           <Alert>
@@ -414,27 +594,16 @@ function App() {
                         <CardHeader className="space-y-3">
                           <CardTitle className="text-lg">Run & review</CardTitle>
                           <p className="text-sm text-muted-foreground">
-                            The backend combines GPS and WebTrack logic, then returns the Movia-ready Danish explanation text.
+                            The backend combines GPS and WebTrack logic, applies any private trip overrides, and returns the Movia-ready Danish explanation text.
                           </p>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="flex flex-col gap-3 sm:flex-row">
-                            <Button
-                              type="button"
-                              onClick={handleRunAnalysis}
-                              disabled={isAnalyzing}
-                              className="sm:min-w-[180px]"
-                              data-testid="run-analysis-button"
-                            >
+                            <Button type="button" onClick={handleRunAnalysis} disabled={isAnalyzing} className="sm:min-w-[180px]" data-testid="run-analysis-button">
                               {isAnalyzing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
-                              {isAnalyzing ? "Running analysis..." : "Run analysis"}
+                              {isAnalyzing ? "Running analysis..." : analysis ? "Re-run analysis" : "Run analysis"}
                             </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={handleCopyCorrectionText}
-                              data-testid="generate-correction-text-button"
-                            >
+                            <Button type="button" variant="outline" onClick={handleCopyCorrectionText} data-testid="generate-correction-text-button">
                               <Copy className="h-4 w-4" />
                               Copy latest text
                             </Button>
@@ -448,11 +617,7 @@ function App() {
                             <div className="rounded-2xl border bg-[hsl(var(--surface-2))] p-4">
                               <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Selected home zone</p>
                               <p className="mt-2 text-sm font-medium">{selectedHome?.label || "No home zone selected"}</p>
-                              {selectedHome ? (
-                                <p className="mt-1 font-mono text-xs text-muted-foreground">
-                                  {selectedHome.lat.toFixed(6)}, {selectedHome.lon.toFixed(6)}
-                                </p>
-                              ) : null}
+                              {selectedHome ? <p className="mt-1 font-mono text-xs text-muted-foreground">{selectedHome.lat.toFixed(6)}, {selectedHome.lon.toFixed(6)}</p> : null}
                             </div>
                           </div>
                           {analysisError ? (
@@ -487,10 +652,18 @@ function App() {
                     <div className="flex items-center gap-2 text-foreground"><MapPin className="h-4 w-4" /> Map guidance</div>
                     <p>1. Upload both files.</p>
                     <p>2. Search the home address or click the map.</p>
-                    <p>3. Run analysis to render the route, entry points, and return markers.</p>
+                    <p>3. Run analysis, then add private trips manually if needed.</p>
                   </CardContent>
                 </Card>
-              ) : null}
+              ) : (
+                <PrivateTripManager
+                  analysis={analysis}
+                  privateTrips={privateTrips}
+                  setPrivateTrips={setPrivateTrips}
+                  onApply={handleRunAnalysis}
+                  isApplying={isAnalyzing}
+                />
+              )}
             </div>
           </div>
 
@@ -499,7 +672,7 @@ function App() {
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold tracking-tight">Results overview</h2>
-                  <p className="text-sm text-muted-foreground">These values update from the proven backend analysis engine.</p>
+                  <p className="text-sm text-muted-foreground">These values update from the authenticated backend analysis engine.</p>
                 </div>
                 {analysis?.upload_summary ? (
                   <Badge variant="outline">
@@ -515,19 +688,10 @@ function App() {
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
               <div className="space-y-6 xl:col-span-8">
-                <SegmentsTable
-                  analysis={analysis}
-                  highlightedSegmentIndex={highlightedSegmentIndex}
-                  onHighlightSegment={setHighlightedSegmentIndex}
-                  onCopySegment={handleCopySegment}
-                />
+                <SegmentsTable analysis={analysis} highlightedSegmentIndex={highlightedSegmentIndex} onHighlightSegment={setHighlightedSegmentIndex} onCopySegment={handleCopySegment} />
               </div>
               <div className="xl:col-span-4">
-                <CorrectionTextPanel
-                  value={analysis?.movia_correction_text || ""}
-                  onCopy={handleCopyCorrectionText}
-                  generatedAt={analysis ? new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
-                />
+                <CorrectionTextPanel value={analysis?.movia_correction_text || ""} onCopy={handleCopyCorrectionText} generatedAt={analysis ? new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""} />
               </div>
             </div>
           </div>

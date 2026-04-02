@@ -1,17 +1,24 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from bson import ObjectId
 from dotenv import load_dotenv
-from fastapi import APIRouter, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, Field
 
 from analysis_core import analyze_day
+from auth_utils import create_access_token, decode_access_token, hash_password, serialize_user, verify_password
 
 
 ROOT_DIR = Path(__file__).parent
@@ -22,12 +29,78 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 app = FastAPI(title="Trip Segment Correction API")
 api_router = APIRouter(prefix="/api")
+auth_scheme = HTTPBearer(auto_error=False)
+
+mongo_url = os.environ.get("MONGO_URL")
+db_name = os.environ.get("DB_NAME", "trip_segment_app")
+client = AsyncIOMotorClient(mongo_url)
+db = client[db_name]
+users_collection = db.users
+admin_logs_collection = db.admin_logs
 
 
-def _allowed_file(filename: str | None, allowed: set[str]) -> bool:
-    if not filename:
-        return False
-    return Path(filename).suffix.lower() in allowed
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=3)
+    password: str = Field(..., min_length=6)
+
+
+class CreateUserRequest(BaseModel):
+    username: str = Field(..., min_length=3)
+    password: str = Field(..., min_length=6)
+    role: str = Field(default="user")
+
+
+class UpdateUserRequest(BaseModel):
+    is_active: bool | None = None
+    role: str | None = None
+
+
+async def ensure_indexes_and_seed() -> None:
+    await users_collection.create_index("username", unique=True)
+    existing_count = await users_collection.count_documents({})
+    if existing_count:
+        return
+    username = os.environ.get("DEFAULT_ADMIN_USERNAME", "owner")
+    password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "Owner123!")
+    now = datetime.now(timezone.utc)
+    await users_collection.insert_one(
+        {
+            "username": username,
+            "password_hash": hash_password(password),
+            "role": "owner",
+            "is_active": True,
+            "created_at": now,
+            "last_login_at": None,
+        }
+    )
+    logger.info("Seeded default owner/admin account: %s", username)
+
+
+@app.on_event("startup")
+async def startup_event() -> None:
+    await ensure_indexes_and_seed()
+
+
+@app.on_event("shutdown")
+async def shutdown_event() -> None:
+    client.close()
+
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(auth_scheme)) -> dict[str, Any]:
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    payload = decode_access_token(credentials.credentials)
+    username = payload.get("sub")
+    user = await users_collection.find_one({"username": username})
+    if not user or not user.get("is_active", True):
+        raise HTTPException(status_code=401, detail="Account is inactive or missing")
+    return user
+
+
+async def require_admin(current_user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
+    if current_user.get("role") not in {"owner", "admin"}:
+        raise HTTPException(status_code=403, detail="Owner/Admin access required")
+    return current_user
 
 
 async def _persist_upload(upload: UploadFile, fallback_name: str) -> str:
@@ -51,6 +124,99 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@api_router.post("/auth/login")
+async def login(payload: LoginRequest) -> JSONResponse:
+    user = await users_collection.find_one({"username": payload.username})
+    if not user or not verify_password(payload.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=403, detail="This account is deactivated")
+
+    await users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"last_login_at": datetime.now(timezone.utc)}},
+    )
+    token = create_access_token(user["username"], user["role"])
+    refreshed_user = await users_collection.find_one({"_id": user["_id"]})
+    return JSONResponse({"access_token": token, "token_type": "bearer", "user": serialize_user(refreshed_user)})
+
+
+@api_router.get("/auth/me")
+async def me(current_user: dict[str, Any] = Depends(get_current_user)) -> JSONResponse:
+    return JSONResponse({"user": serialize_user(current_user)})
+
+
+@api_router.get("/admin/users")
+async def list_users(_: dict[str, Any] = Depends(require_admin)) -> JSONResponse:
+    users = await users_collection.find({}, sort=[("created_at", 1)]).to_list(length=200)
+    return JSONResponse({"users": [serialize_user(user) for user in users]})
+
+
+@api_router.post("/admin/users")
+async def create_user(payload: CreateUserRequest, current_user: dict[str, Any] = Depends(require_admin)) -> JSONResponse:
+    role = payload.role if payload.role in {"owner", "admin", "user"} else "user"
+    existing = await users_collection.find_one({"username": payload.username})
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    now = datetime.now(timezone.utc)
+    result = await users_collection.insert_one(
+        {
+            "username": payload.username,
+            "password_hash": hash_password(payload.password),
+            "role": role,
+            "is_active": True,
+            "created_at": now,
+            "last_login_at": None,
+        }
+    )
+    created_user = await users_collection.find_one({"_id": result.inserted_id})
+    await admin_logs_collection.insert_one(
+        {
+            "actor_username": current_user["username"],
+            "action": "create_user",
+            "target_username": payload.username,
+            "timestamp": now,
+        }
+    )
+    return JSONResponse({"user": serialize_user(created_user)})
+
+
+@api_router.patch("/admin/users/{user_id}")
+async def update_user(user_id: str, payload: UpdateUserRequest, current_user: dict[str, Any] = Depends(require_admin)) -> JSONResponse:
+    try:
+        object_id = ObjectId(user_id)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail="Invalid user id") from exc
+
+    target = await users_collection.find_one({"_id": object_id})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    if target["username"] == current_user["username"] and payload.is_active is False:
+        raise HTTPException(status_code=400, detail="You cannot deactivate your own account")
+
+    updates: dict[str, Any] = {}
+    if payload.is_active is not None:
+        updates["is_active"] = payload.is_active
+    if payload.role in {"owner", "admin", "user"}:
+        updates["role"] = payload.role
+    if not updates:
+        raise HTTPException(status_code=400, detail="No valid updates supplied")
+
+    await users_collection.update_one({"_id": object_id}, {"$set": updates})
+    updated = await users_collection.find_one({"_id": object_id})
+    await admin_logs_collection.insert_one(
+        {
+            "actor_username": current_user["username"],
+            "action": "update_user",
+            "target_username": updated["username"],
+            "updates": updates,
+            "timestamp": datetime.now(timezone.utc),
+        }
+    )
+    return JSONResponse({"user": serialize_user(updated)})
+
+
 @api_router.post("/analyze")
 async def analyze_trip(
     gps_file: UploadFile = File(...),
@@ -62,32 +228,22 @@ async def analyze_trip(
     stable_points: int = Form(3),
     last_order_lat: float | None = Form(None),
     last_order_lon: float | None = Form(None),
+    private_trip_overrides: str | None = Form(None),
+    current_user: dict[str, Any] = Depends(get_current_user),
 ) -> JSONResponse:
-    if not _allowed_file(gps_file.filename, {".csv", ".xlsx", ".xls"}):
-        raise HTTPException(status_code=400, detail="GPS file must be CSV or Excel (.xlsx/.xls)")
-    if not _allowed_file(webtrack_file.filename, {".pdf", ".xlsx", ".xls", ".csv"}):
-        raise HTTPException(status_code=400, detail="WebTrack file must be PDF or Excel/CSV")
-    if radius_m < 200 or radius_m > 500:
-        raise HTTPException(status_code=400, detail="Home zone radius must be between 200 and 500 meters")
-    if dwell_minutes < 1 or dwell_minutes > 60:
-        raise HTTPException(status_code=400, detail="Return dwell must be between 1 and 60 minutes")
-    if stable_points < 2 or stable_points > 5:
-        raise HTTPException(status_code=400, detail="Stable detection points must be between 2 and 5")
-
     gps_path = None
     webtrack_path = None
     try:
+        if Path(gps_file.filename or "").suffix.lower() not in {".csv", ".xlsx", ".xls"}:
+            raise HTTPException(status_code=400, detail="GPS file must be CSV or Excel (.xlsx/.xls)")
+        if Path(webtrack_file.filename or "").suffix.lower() not in {".pdf", ".xlsx", ".xls", ".csv"}:
+            raise HTTPException(status_code=400, detail="WebTrack file must be PDF or Excel/CSV")
+        if radius_m < 200 or radius_m > 500:
+            raise HTTPException(status_code=400, detail="Home zone radius must be between 200 and 500 meters")
+
         gps_path = await _persist_upload(gps_file, "gps-upload.csv")
         webtrack_path = await _persist_upload(webtrack_file, "webtrack-upload.pdf")
-
-        logger.info(
-            "Running analysis for gps=%s webtrack=%s radius=%s dwell=%s stable_points=%s",
-            gps_file.filename,
-            webtrack_file.filename,
-            radius_m,
-            dwell_minutes,
-            stable_points,
-        )
+        trip_overrides = json.loads(private_trip_overrides) if private_trip_overrides else []
 
         result = analyze_day(
             gps_path=gps_path,
@@ -99,17 +255,16 @@ async def analyze_trip(
             stable_point_count=stable_points,
             last_order_latitude=last_order_lat,
             last_order_longitude=last_order_lon,
+            private_trip_overrides=trip_overrides,
         )
-        response: dict[str, Any] = {
-            **result,
-            "upload_summary": {
-                "gps_filename": gps_file.filename,
-                "webtrack_filename": webtrack_file.filename,
-                "gps_file_type": Path(gps_file.filename or "").suffix.lower(),
-                "webtrack_file_type": Path(webtrack_file.filename or "").suffix.lower(),
-            },
+        result["upload_summary"] = {
+            "gps_filename": gps_file.filename,
+            "webtrack_filename": webtrack_file.filename,
+            "gps_file_type": Path(gps_file.filename or "").suffix.lower(),
+            "webtrack_file_type": Path(webtrack_file.filename or "").suffix.lower(),
+            "requested_by": current_user["username"],
         }
-        return JSONResponse(content=response)
+        return JSONResponse(content=result)
     except HTTPException:
         raise
     except Exception as exc:  # noqa: BLE001
@@ -125,7 +280,6 @@ async def analyze_trip(
 
 
 app.include_router(api_router)
-
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,

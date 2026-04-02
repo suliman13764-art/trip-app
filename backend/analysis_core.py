@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import math
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable
@@ -19,7 +19,6 @@ GPS_DATETIME_FORMATS = [
     "%Y-%m-%d %H:%M:%S",
     "%Y-%m-%d %H:%M",
 ]
-
 WEBTRACK_DT_RE = re.compile(r"^(\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}(?::\d{2})?)(.*)$")
 RUN_RE = re.compile(r"\b\d{4}/\d{4}\b")
 STOP_ACTION_RE = re.compile(r"(?:Total\s+\d+\s+stop\s+)?(\d{2})\s+(AFLEV|BAG)\s+(\d{2}:\d{2})")
@@ -31,6 +30,7 @@ POSTAL_ADDRESS_RE = re.compile(
     r"PN:(\d{4})\s+(.+?)(?=\s+(?:OBS|INTET|Tlf\.?|tlf\.?|\(\d{2}:\d{2}\)|\d+\s+PER|FLERE\s+STOP|$))"
 )
 TIME_IN_TEXT_RE = re.compile(r"\b\d{1,2}:\d{2}\b")
+WORK_MESSAGE_TYPES = {"route_end", "drive_home", "bag", "aflev", "aflev/bag", "general"}
 
 
 @dataclass
@@ -53,6 +53,8 @@ class Segment:
     end_point: dict[str, Any] | None
     closure_reason: str
     is_estimated_end: bool = False
+    stops: list[int] | None = None
+    private_trip_split: bool = False
 
 
 def _safe_float(value: Any) -> float | None:
@@ -66,6 +68,7 @@ def _safe_float(value: Any) -> float | None:
         return float(text)
     except ValueError:
         return None
+
 
 
 def parse_datetime_value(value: Any) -> datetime | None:
@@ -87,6 +90,18 @@ def parse_datetime_value(value: Any) -> datetime | None:
     return parsed.to_pydatetime().replace(tzinfo=None)
 
 
+
+def combine_date_and_clock(source_date: datetime, clock_text: str | None) -> datetime | None:
+    if not source_date or not clock_text:
+        return None
+    try:
+        parsed_clock = datetime.strptime(clock_text, "%H:%M")
+    except ValueError:
+        return None
+    return source_date.replace(hour=parsed_clock.hour, minute=parsed_clock.minute, second=0, microsecond=0)
+
+
+
 def haversine_meters(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     radius = 6_371_000
     phi1 = math.radians(lat1)
@@ -100,10 +115,12 @@ def haversine_meters(lat1: float, lon1: float, lat2: float, lon2: float) -> floa
     return 2 * radius * math.asin(math.sqrt(a))
 
 
+
 def _detect_csv_separator(sample: str) -> str:
     candidates = [";", ",", "\t", "|"]
     counts = {sep: sample.count(sep) for sep in candidates}
     return max(counts, key=counts.get)
+
 
 
 def parse_gps_file(file_path: str | Path) -> list[GPSPoint]:
@@ -135,7 +152,6 @@ def parse_gps_file(file_path: str | Path) -> list[GPSPoint]:
 
     original_columns = list(frame.columns)
     normalized_columns = {str(col).strip().lower(): col for col in original_columns}
-
     datetime_col = next(
         (
             normalized_columns[name]
@@ -178,16 +194,14 @@ def parse_gps_file(file_path: str | Path) -> list[GPSPoint]:
         if timestamp is None or latitude is None or longitude is None:
             continue
         speed = _safe_float(row.get(speed_col)) if speed_col else None
-        status = str(row.get(status_col) or "").strip()
-        address = str(row.get(address_col) or "").strip()
         points.append(
             GPSPoint(
                 timestamp=timestamp,
                 latitude=latitude,
                 longitude=longitude,
                 speed=speed,
-                status=status,
-                address=address,
+                status=str(row.get(status_col) or "").strip(),
+                address=str(row.get(address_col) or "").strip(),
             )
         )
 
@@ -198,6 +212,7 @@ def parse_gps_file(file_path: str | Path) -> list[GPSPoint]:
     return points
 
 
+
 def _extract_lines_from_pdf(path: Path) -> list[str]:
     lines: list[str] = []
     with pdfplumber.open(path) as pdf:
@@ -205,6 +220,7 @@ def _extract_lines_from_pdf(path: Path) -> list[str]:
             text = page.extract_text() or ""
             lines.extend(text.splitlines())
     return lines
+
 
 
 def _extract_lines_from_excel(path: Path) -> list[str]:
@@ -218,23 +234,20 @@ def _extract_lines_from_excel(path: Path) -> list[str]:
     return lines
 
 
+
 def _clean_webtrack_lines(lines: Iterable[str]) -> list[str]:
     cleaned: list[str] = []
     for raw_line in lines:
         line = re.sub(r"\s+", " ", str(raw_line).strip())
         if not line:
             continue
-        if line.startswith("https://"):
-            continue
-        if line in {"WebTrack rapport", "Modtaget"}:
-            cleaned.append(line)
-            continue
-        if re.fullmatch(r"\d+/\d+", line):
+        if line.startswith("https://") or re.fullmatch(r"\d+/\d+", line):
             continue
         if re.match(r"^\d{1,2}/\d{1,2}/\d{2},", line):
             continue
         cleaned.append(line)
     return cleaned
+
 
 
 def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
@@ -262,13 +275,19 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
         raw_text = " ".join(payload_lines).strip()
         run_numbers = sorted(set(RUN_RE.findall(raw_text)))
         stop_matches = [
-            {"stop_number": match[0], "action": match[1], "planned_time": match[2]}
+            {
+                "stop_number": match[0],
+                "action": match[1],
+                "planned_time": match[2],
+                "completion_datetime": combine_date_and_clock(current["timestamp"], match[2]),
+            }
             for match in STOP_ACTION_RE.findall(raw_text)
         ]
         notice_stops = sorted(set(STOP_NOTICE_RE.findall(raw_text)))
-        order_number = None
+
         primary_order = PRIMARY_ORDER_RE.search(raw_text)
         stop_order = STOP_ORDER_RE.search(raw_text)
+        order_number = None
         if primary_order:
             order_number = primary_order.group(1)
         elif stop_order:
@@ -277,8 +296,7 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
             loose_numbers = [
                 number
                 for number in re.findall(r"\b\d{4}\b", raw_text)
-                if number not in {run.split("/")[0] for run in run_numbers}
-                and number not in {run.split("/")[1] for run in run_numbers}
+                if number not in {part for run in run_numbers for part in run.split("/")}
             ]
             order_number = loose_numbers[0] if loose_numbers else None
 
@@ -286,8 +304,8 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
         homezone_message = re.search(r"KØRE TIL HJEMZONE", raw_text)
 
         extracted_address = None
-        age_match = AGE_ADDRESS_RE.search(raw_text)
         post_match = POSTAL_ADDRESS_RE.search(raw_text)
+        age_match = AGE_ADDRESS_RE.search(raw_text)
         if post_match:
             postal_code, address_part = post_match.groups()
             extracted_address = f"{address_part.strip()}, {postal_code}".strip(", ")
@@ -306,7 +324,11 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
         elif "NewOrder" in raw_text:
             message_type = "new_order"
 
-        service_times = sorted(set(TIME_IN_TEXT_RE.findall(raw_text)))
+        completion_times = [
+            match["completion_datetime"]
+            for match in stop_matches
+            if match["action"] == "AFLEV" and match["completion_datetime"] is not None
+        ]
 
         records.append(
             {
@@ -320,7 +342,8 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
                 "v_lobe_slut_time": v_lobe_slut.group(1) if v_lobe_slut else None,
                 "contains_drive_home": bool(homezone_message),
                 "extracted_address": extracted_address,
-                "service_times": service_times,
+                "service_times": sorted(set(TIME_IN_TEXT_RE.findall(raw_text))),
+                "completion_times": completion_times,
                 "is_meaningful": message_type != "new_order",
             }
         )
@@ -330,17 +353,17 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
         if match:
             push_current()
             timestamp = parse_datetime_value(match.group(1))
-            remainder = match.group(2).strip()
-            current = {"timestamp": timestamp, "parts": [remainder] if remainder else []}
+            current = {"timestamp": timestamp, "parts": [match.group(2).strip()] if match.group(2).strip() else []}
         elif current is not None:
             current["parts"].append(line)
     push_current()
 
-    meaningful_records = [record for record in records if record["timestamp"] is not None]
-    meaningful_records.sort(key=lambda record: record["timestamp"])
-    if not meaningful_records:
+    records = [record for record in records if record["timestamp"] is not None]
+    records.sort(key=lambda record: record["timestamp"])
+    if not records:
         raise ValueError("No timestamped WebTrack records could be extracted from the file")
-    return meaningful_records
+    return records
+
 
 
 def summarize_webtrack(records: list[dict[str, Any]]) -> dict[str, Any]:
@@ -354,7 +377,6 @@ def summarize_webtrack(records: list[dict[str, Any]]) -> dict[str, Any]:
         }
         | {int(stop) for record in records for stop in record["notice_stops"] if stop.isdigit()}
     )
-
     primary_order_numbers = [record["order_number"] for record in records if record["order_number"]]
     primary_order = max(set(primary_order_numbers), key=primary_order_numbers.count) if primary_order_numbers else None
 
@@ -374,6 +396,28 @@ def summarize_webtrack(records: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         None,
     )
+    completion_events = [
+        {
+            "timestamp": completion_time,
+            "stop_number": match["stop_number"],
+            "order_number": record["order_number"],
+            "raw_text": record["raw_text"],
+        }
+        for record in records
+        for match in record["stop_matches"]
+        for completion_time in [match["completion_datetime"]]
+        if match["action"] == "AFLEV" and completion_time is not None
+    ]
+    completion_events.sort(key=lambda item: item["timestamp"])
+    meaningful_event_times = [
+        {
+            "timestamp": record["timestamp"],
+            "message_type": record["message_type"],
+            "raw_text": record["raw_text"],
+        }
+        for record in records
+        if record["message_type"] in WORK_MESSAGE_TYPES
+    ]
 
     return {
         "run_numbers": run_numbers,
@@ -387,7 +431,10 @@ def summarize_webtrack(records: list[dict[str, Any]]) -> dict[str, Any]:
         "last_order_with_address": last_order_with_address,
         "v_lobe_slut_times": [record["v_lobe_slut_time"] for record in records if record["v_lobe_slut_time"]],
         "drive_home_messages": [record for record in records if record["contains_drive_home"]],
+        "completion_events": completion_events,
+        "meaningful_event_times": meaningful_event_times,
     }
+
 
 
 def derive_home_center_for_poc(points: list[GPSPoint]) -> tuple[float, float, str]:
@@ -404,6 +451,7 @@ def derive_home_center_for_poc(points: list[GPSPoint]) -> tuple[float, float, st
     return latitude, longitude, "derived_from_final_stationary_cluster"
 
 
+
 def _point_to_dict(point: GPSPoint) -> dict[str, Any]:
     return {
         "timestamp": point.timestamp.isoformat(sep=" "),
@@ -415,6 +463,7 @@ def _point_to_dict(point: GPSPoint) -> dict[str, Any]:
         "address": point.address,
         "inside_home_zone": point.inside_home_zone,
     }
+
 
 
 def detect_segments(
@@ -430,12 +479,7 @@ def detect_segments(
         return [], {"closest_distance_m": None, "reason": "No GPS points"}
 
     for point in points:
-        point.distance_to_home_m = haversine_meters(
-            point.latitude,
-            point.longitude,
-            home_latitude,
-            home_longitude,
-        )
+        point.distance_to_home_m = haversine_meters(point.latitude, point.longitude, home_latitude, home_longitude)
         point.inside_home_zone = point.distance_to_home_m <= radius_meters
 
     runs: list[dict[str, Any]] = []
@@ -452,24 +496,19 @@ def detect_segments(
 
     segments: list[Segment] = []
     open_segment: Segment | None = None
-    closest_distance_m = min(point.distance_to_home_m for point in points)
     rejected_returns: list[dict[str, Any]] = []
-
     for index, run in enumerate(runs):
-        run_points: list[GPSPoint] = run["points"]
+        run_points = run["points"]
         if run["inside"]:
             if open_segment is None:
                 continue
             if len(run_points) < min_return_points:
-                rejected_returns.append(
-                    {
-                        "candidate_entry_time": run_points[0].timestamp.isoformat(sep=" "),
-                        "reason": "Too few consecutive inside points",
-                    }
-                )
+                rejected_returns.append({
+                    "candidate_entry_time": run_points[0].timestamp.isoformat(sep=" "),
+                    "reason": "Too few consecutive inside points",
+                })
                 continue
             dwell_seconds = (run_points[-1].timestamp - run_points[0].timestamp).total_seconds()
-            statuses = {point.status.lower() for point in run_points if point.status}
             has_meaningful_stop = any(
                 ((point.speed is not None and point.speed <= 1) or point.status.lower() in {"stop", "paused", "parked"})
                 for point in run_points
@@ -484,19 +523,15 @@ def detect_segments(
                 open_segment.end_time = run_points[0].timestamp
                 open_segment.end_point = _point_to_dict(run_points[0])
                 open_segment.closure_reason = (
-                    "valid_home_return_with_dwell"
-                    if dwell_seconds >= min_return_dwell_minutes * 60
-                    else "valid_home_return_with_stop_or_end_of_data"
+                    "valid_home_return_with_dwell" if dwell_seconds >= min_return_dwell_minutes * 60 else "valid_home_return_with_stop_or_end_of_data"
                 )
                 segments.append(open_segment)
                 open_segment = None
             else:
-                rejected_returns.append(
-                    {
-                        "candidate_entry_time": run_points[0].timestamp.isoformat(sep=" "),
-                        "reason": f"Inside run did not reach dwell threshold; dwell_seconds={int(dwell_seconds)}, statuses={sorted(statuses)}",
-                    }
-                )
+                rejected_returns.append({
+                    "candidate_entry_time": run_points[0].timestamp.isoformat(sep=" "),
+                    "reason": f"Inside run did not reach dwell threshold; dwell_seconds={int(dwell_seconds)}",
+                })
             continue
 
         if len(run_points) < min_departure_points:
@@ -508,10 +543,11 @@ def detect_segments(
                 start_point=_point_to_dict(run_points[0]),
                 end_point=None,
                 closure_reason="departure_confirmed_after_consecutive_outside_points",
+                stops=[],
             )
 
     debug = {
-        "closest_distance_m": round(closest_distance_m, 1) if closest_distance_m is not None else None,
+        "closest_distance_m": round(min(point.distance_to_home_m for point in points), 1),
         "runs": [
             {
                 "inside": run["inside"],
@@ -525,9 +561,175 @@ def detect_segments(
             for run in runs
         ],
         "rejected_returns": rejected_returns,
-        "open_segment_after_scan": asdict(open_segment) if open_segment else None,
     }
     return segments, debug
+
+
+
+def normalize_private_trip_overrides(private_trip_overrides: list[dict[str, Any]] | None, analysis_date: datetime) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for index, trip in enumerate(private_trip_overrides or []):
+        start = trip.get("start_time")
+        end = trip.get("end_time")
+        start_dt = parse_datetime_value(start) or combine_date_and_clock(analysis_date, str(start))
+        end_dt = parse_datetime_value(end) or combine_date_and_clock(analysis_date, str(end))
+        if not start_dt or not end_dt or end_dt <= start_dt:
+            continue
+        normalized.append(
+            {
+                "id": trip.get("id") or f"private-trip-{index + 1}",
+                "start_time": start_dt,
+                "end_time": end_dt,
+                "source": trip.get("source", "manual"),
+                "notes": trip.get("notes", ""),
+                "confidence": trip.get("confidence", "confirmed"),
+            }
+        )
+    normalized.sort(key=lambda item: item["start_time"])
+    return normalized
+
+
+
+def find_last_completion_before(webtrack_summary: dict[str, Any], boundary: datetime, segment_start: datetime) -> dict[str, Any] | None:
+    candidates = [
+        event for event in webtrack_summary["completion_events"] if segment_start <= event["timestamp"] <= boundary
+    ]
+    return candidates[-1] if candidates else None
+
+
+
+def infer_resume_after(
+    private_trip_end: datetime,
+    gps_points: list[GPSPoint],
+    webtrack_summary: dict[str, Any],
+) -> tuple[datetime | None, dict[str, Any]]:
+    next_gps = next(
+        (
+            point
+            for point in gps_points
+            if point.timestamp >= private_trip_end
+            and ((point.speed is not None and point.speed > 1) or point.status.lower() in {"start", "moving"})
+        ),
+        None,
+    )
+    next_work_event = next(
+        (
+            event
+            for event in webtrack_summary["meaningful_event_times"]
+            if event["timestamp"] >= private_trip_end and event["message_type"] in WORK_MESSAGE_TYPES
+        ),
+        None,
+    )
+
+    resume_candidates = [candidate for candidate in [next_gps.timestamp if next_gps else None, next_work_event["timestamp"] if next_work_event else None] if candidate]
+    resume_time = min(resume_candidates) if resume_candidates else None
+    debug = {
+        "next_gps_resume": next_gps.timestamp.isoformat(sep=" ") if next_gps else None,
+        "next_work_event_resume": next_work_event["timestamp"].isoformat(sep=" ") if next_work_event else None,
+        "selected_resume": resume_time.isoformat(sep=" ") if resume_time else None,
+    }
+    return resume_time, debug
+
+
+
+def attach_segment_stop_ranges(segments: list[Segment], webtrack_summary: dict[str, Any]) -> None:
+    completion_events = webtrack_summary["completion_events"]
+    for segment in segments:
+        if not segment.end_time:
+            segment.stops = []
+            continue
+        segment.stops = sorted(
+            {
+                int(event["stop_number"])
+                for event in completion_events
+                if event["timestamp"] >= segment.start_time and event["timestamp"] <= segment.end_time and str(event["stop_number"]).isdigit()
+            }
+        )
+
+
+
+def apply_private_trip_overlays(
+    segments: list[Segment],
+    webtrack_summary: dict[str, Any],
+    gps_points: list[GPSPoint],
+    private_trips: list[dict[str, Any]],
+) -> tuple[list[Segment], list[dict[str, Any]], list[dict[str, Any]]]:
+    if not private_trips:
+        attach_segment_stop_ranges(segments, webtrack_summary)
+        return segments, [], []
+
+    adjusted_segments = segments[:]
+    adjustments: list[dict[str, Any]] = []
+    applied_private_trips: list[dict[str, Any]] = []
+
+    for private_trip in private_trips:
+        next_segments: list[Segment] = []
+        trip_applied = False
+        for segment in adjusted_segments:
+            if not segment.end_time or private_trip["start_time"] >= segment.end_time or private_trip["end_time"] <= segment.start_time:
+                next_segments.append(segment)
+                continue
+
+            trip_applied = True
+            last_completion = find_last_completion_before(webtrack_summary, private_trip["start_time"], segment.start_time)
+            split_end = last_completion["timestamp"] if last_completion else private_trip["start_time"]
+            resume_time, resume_debug = infer_resume_after(private_trip["end_time"], gps_points, webtrack_summary)
+
+            if split_end > segment.start_time:
+                next_segments.append(
+                    Segment(
+                        start_time=segment.start_time,
+                        end_time=split_end,
+                        start_point=segment.start_point,
+                        end_point=segment.end_point,
+                        closure_reason="private_trip_cutoff_before_private_start",
+                        is_estimated_end=False,
+                        private_trip_split=True,
+                    )
+                )
+            if resume_time and segment.end_time and resume_time < segment.end_time:
+                resume_point = next(
+                    (point for point in gps_points if point.timestamp >= resume_time),
+                    None,
+                )
+                next_segments.append(
+                    Segment(
+                        start_time=resume_time,
+                        end_time=segment.end_time,
+                        start_point=_point_to_dict(resume_point) if resume_point else segment.start_point,
+                        end_point=segment.end_point,
+                        closure_reason="resumed_after_private_trip",
+                        is_estimated_end=segment.is_estimated_end,
+                        private_trip_split=True,
+                    )
+                )
+            adjustments.append(
+                {
+                    "private_trip_id": private_trip["id"],
+                    "reason": "segment_split_by_private_trip",
+                    "segment_original_start": segment.start_time.isoformat(sep=" "),
+                    "segment_original_end": segment.end_time.isoformat(sep=" ") if segment.end_time else None,
+                    "adjusted_end_before_private": split_end.isoformat(sep=" "),
+                    "resume_after_private": resume_time.isoformat(sep=" ") if resume_time else None,
+                    "last_completion_before_private": last_completion["timestamp"].isoformat(sep=" ") if last_completion else None,
+                    "resume_debug": resume_debug,
+                }
+            )
+
+        adjusted_segments = sorted(next_segments, key=lambda item: item.start_time)
+        if trip_applied:
+            applied_private_trips.append(
+                {
+                    **private_trip,
+                    "start_time": private_trip["start_time"].isoformat(sep=" "),
+                    "end_time": private_trip["end_time"].isoformat(sep=" "),
+                }
+            )
+
+    adjusted_segments = [segment for segment in adjusted_segments if segment.end_time and segment.end_time > segment.start_time]
+    attach_segment_stop_ranges(adjusted_segments, webtrack_summary)
+    return adjusted_segments, applied_private_trips, adjustments
+
 
 
 def estimate_fallback_end(
@@ -542,24 +744,13 @@ def estimate_fallback_end(
     if last_order:
         base_time = last_order["timestamp"]
         if last_order_latitude is not None and last_order_longitude is not None:
-            distance_home = haversine_meters(
-                last_order_latitude,
-                last_order_longitude,
-                home_latitude,
-                home_longitude,
-            )
+            distance_home = haversine_meters(last_order_latitude, last_order_longitude, home_latitude, home_longitude)
             method = "last_order_address_plus_estimated_travel"
         else:
             nearest_point = min(points, key=lambda point: abs((point.timestamp - base_time).total_seconds()))
-            distance_home = haversine_meters(
-                nearest_point.latitude,
-                nearest_point.longitude,
-                home_latitude,
-                home_longitude,
-            )
+            distance_home = haversine_meters(nearest_point.latitude, nearest_point.longitude, home_latitude, home_longitude)
             method = "last_order_time_plus_estimated_travel_from_nearest_gps_point"
-        avg_speed_kmh = 35
-        travel_minutes = max(5, round((distance_home / 1000) / avg_speed_kmh * 60))
+        travel_minutes = max(5, round((distance_home / 1000) / 35 * 60))
         estimated_end = base_time + timedelta(minutes=travel_minutes)
         return {
             "method": method,
@@ -574,14 +765,14 @@ def estimate_fallback_end(
         }
 
     if points:
-        last_point = points[-1]
         return {
             "method": "last_gps_timestamp",
-            "timestamp": last_point.timestamp,
-            "distance_home_m": round(last_point.distance_to_home_m, 1),
+            "timestamp": points[-1].timestamp,
+            "distance_home_m": round(points[-1].distance_to_home_m, 1),
             "source_order": None,
         }
     return None
+
 
 
 def generate_movia_correction_text(result: dict[str, Any]) -> str:
@@ -593,13 +784,7 @@ def generate_movia_correction_text(result: dict[str, Any]) -> str:
     run_number = result["webtrack_summary"]["primary_run_number"] or "Ikke fundet i filen"
     order_number = result["webtrack_summary"]["primary_order_number"] or "Ikke fundet i filen"
     stop_numbers = result["webtrack_summary"]["stop_numbers"]
-    stop_text = (
-        f"{stop_numbers[0]}-{stop_numbers[-1]} ({len(stop_numbers)} stop)"
-        if stop_numbers
-        else "Ikke fundet i filen"
-    )
-    end_basis = result["end_time_basis_label"]
-    estimation_note = result.get("estimation_note")
+    stop_text = f"{stop_numbers[0]}-{stop_numbers[-1]} ({len(stop_numbers)} stop)" if stop_numbers else "Ikke fundet i filen"
 
     lines = [
         f"Dato: {work_date}",
@@ -608,21 +793,27 @@ def generate_movia_correction_text(result: dict[str, Any]) -> str:
         f"Stoppesteder: {stop_text}",
         f"Starttid: {start_time}",
         f"Sluttid: {end_time}",
-        f"Arbejdstid i alt: {total_minutes} minutter" if total_minutes is not None else "Arbejdstid i alt: Ikke fundet i filen",
+        f"Arbejdstid i alt: {total_minutes} minutter" if total_minutes is not None else "Arbejdstid i alt: Ikke oplyst",
         f"Antal forløb: {segment_count}",
-        f"Sluttid er fastsat efter: {end_basis}",
+        f"Sluttid er fastsat efter: {result['end_time_basis_label']}",
     ]
-    if estimation_note:
-        lines.append(f"Bemærkning: {estimation_note}")
+    if result.get("estimation_note"):
+        lines.append(f"Bemærkning: {result['estimation_note']}")
+    for private_trip in result.get("private_trips", []):
+        lines.append(
+            f"Privat kørsel fra {private_trip['start_time'][11:16]} til {private_trip['end_time'][11:16]} er fratrukket arbejdstiden."
+        )
 
-    explanation = [
-        "Forklaring:",
-        "Starttid er sat til det tidspunkt, hvor bilen forlader hjemmezonen efter stabil udkørsel.",
-        "Sluttid er sat til første gyldige indkørsel i hjemmezonen og ikke til sidste GPS-punkt.",
-        f"Systemet fandt {segment_count} forløb på dagen baseret på udkørsel og hjemkomst.",
-    ]
-    lines.extend(explanation)
+    lines.extend(
+        [
+            "Forklaring:",
+            "Starttid er sat til det tidspunkt, hvor bilen forlader hjemmezonen efter stabil udkørsel.",
+            "Sluttid er sat til første gyldige indkørsel i hjemmezonen og ikke til sidste GPS-punkt.",
+            f"Systemet fandt {segment_count} forløb på dagen baseret på udkørsel, hjemkomst og eventuelle private ture.",
+        ]
+    )
     return "\n".join(lines)
+
 
 
 def analyze_day(
@@ -635,6 +826,7 @@ def analyze_day(
     stable_point_count: int = 3,
     last_order_latitude: float | None = None,
     last_order_longitude: float | None = None,
+    private_trip_overrides: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     gps_points = parse_gps_file(gps_path)
     webtrack_records = parse_webtrack_file(webtrack_path)
@@ -644,7 +836,7 @@ def analyze_day(
     if home_latitude is None or home_longitude is None:
         home_latitude, home_longitude, home_source = derive_home_center_for_poc(gps_points)
 
-    segments, segment_debug = detect_segments(
+    base_segments, segment_debug = detect_segments(
         gps_points,
         home_latitude=home_latitude,
         home_longitude=home_longitude,
@@ -654,14 +846,22 @@ def analyze_day(
         min_return_dwell_minutes=min_return_dwell_minutes,
     )
 
-    final_segments: list[Segment] = []
+    normalized_private_trips = normalize_private_trip_overrides(private_trip_overrides, gps_points[0].timestamp)
+    attach_segment_stop_ranges(base_segments, webtrack_summary)
+    adjusted_segments, applied_private_trips, segment_adjustments = apply_private_trip_overlays(
+        base_segments,
+        webtrack_summary,
+        gps_points,
+        normalized_private_trips,
+    )
+
+    final_segments = adjusted_segments or base_segments
     end_time_basis_label = "Første gyldige indkørsel i hjemmezone"
     estimation_note = None
     fallback = None
     needs_order_geocode = False
-    if segments:
-        final_segments = segments
-    else:
+
+    if not final_segments:
         fallback = estimate_fallback_end(
             gps_points,
             webtrack_summary,
@@ -676,15 +876,17 @@ def analyze_day(
             and last_order_longitude is None
         )
         if fallback:
-            fallback_segment = Segment(
-                start_time=gps_points[0].timestamp,
-                end_time=fallback["timestamp"],
-                start_point=_point_to_dict(gps_points[0]),
-                end_point=None,
-                closure_reason=fallback["method"],
-                is_estimated_end=True,
-            )
-            final_segments = [fallback_segment]
+            final_segments = [
+                Segment(
+                    start_time=gps_points[0].timestamp,
+                    end_time=fallback["timestamp"],
+                    start_point=_point_to_dict(gps_points[0]),
+                    end_point=None,
+                    closure_reason=fallback["method"],
+                    is_estimated_end=True,
+                    stops=[],
+                )
+            ]
             end_time_basis_label = "Estimeret sluttid"
             estimation_note = (
                 "GPS viste ikke en sikker hjemkomst. Sluttiden er estimeret ud fra sidste meningsfulde ordre og rejsetid."
@@ -694,9 +896,13 @@ def analyze_day(
 
     computed_start = final_segments[0].start_time if final_segments else None
     computed_end = final_segments[-1].end_time if final_segments and final_segments[-1].end_time else None
-    total_work_minutes = None
-    if computed_start and computed_end:
-        total_work_minutes = round((computed_end - computed_start).total_seconds() / 60)
+    total_work_minutes = sum(
+        max(0, round((segment.end_time - segment.start_time).total_seconds() / 60))
+        for segment in final_segments
+        if segment.end_time
+    )
+    segment_debug["private_trip_overrides_count"] = len(normalized_private_trips)
+    segment_debug["segment_adjustments"] = segment_adjustments
 
     result = {
         "home_center": {
@@ -738,27 +944,27 @@ def analyze_day(
                 "end_point": segment.end_point,
                 "closure_reason": segment.closure_reason,
                 "is_estimated_end": segment.is_estimated_end,
+                "stops": segment.stops or [],
+                "private_trip_split": segment.private_trip_split,
             }
             for segment in final_segments
         ],
+        "private_trips": applied_private_trips,
+        "private_trip_suggestions": [],
         "computed_start_time": computed_start.strftime("%H:%M") if computed_start else None,
         "computed_end_time": computed_end.strftime("%H:%M") if computed_end else None,
-        "total_work_minutes": total_work_minutes,
+        "total_work_minutes": total_work_minutes if final_segments else None,
         "end_time_basis_label": end_time_basis_label,
         "estimation_note": estimation_note,
         "needs_order_geocode": needs_order_geocode,
         "segment_debug": segment_debug,
-        "fallback": {
-            **fallback,
-            "timestamp": fallback["timestamp"].isoformat(sep=" "),
-        }
-        if fallback
-        else None,
+        "fallback": {**fallback, "timestamp": fallback["timestamp"].isoformat(sep=" ")} if fallback else None,
         "gps_points_for_map": [_point_to_dict(point) for point in gps_points],
         "movia_correction_text": "",
     }
     result["movia_correction_text"] = generate_movia_correction_text(result)
     return result
+
 
 
 def dump_json(data: dict[str, Any], path: str | Path) -> None:
