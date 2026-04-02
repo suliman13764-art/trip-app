@@ -93,8 +93,8 @@ function App() {
   const [authToken, setAuthToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [loginUsername, setLoginUsername] = useState("owner");
-  const [loginPassword, setLoginPassword] = useState("Owner123!");
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [adminUsers, setAdminUsers] = useState([]);

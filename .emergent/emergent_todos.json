@@ -1,26 +1,14 @@
 [
   {
-    "content": "Phase 3: Extend analysis engine to support private-trip-aware segment splitting",
+    "content": "Phase 5: Replace seeded owner/admin credentials with requested ahabus account",
     "status": "completed"
   },
   {
-    "content": "Phase 3: Add manual private trip marking/confirmation UI and correction text updates",
+    "content": "Phase 5: Remove login password autofill requirement",
     "status": "completed"
   },
   {
-    "content": "Phase 4: Implement username/password auth with seeded owner/admin account",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 4: Implement admin-only user management with soft deactivate RBAC",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 4: Protect analysis flow behind authentication",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 4: End-to-end testing using Testing Agent for private trip + RBAC flows",
+    "content": "Phase 5: Verify new owner login and old owner deactivation",
     "status": "completed"
   }
 ]
