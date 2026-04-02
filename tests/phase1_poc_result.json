@@ -1,0 +1,2661 @@
+{
+  "home_center": {
+    "latitude": 55.225517,
+    "longitude": 11.747365,
+    "radius_meters": 300.0,
+    "source": "derived_from_final_stationary_cluster"
+  },
+  "gps_summary": {
+    "point_count": 255,
+    "date": "02-04-2026",
+    "first_timestamp": "2026-04-02 10:36:20",
+    "last_timestamp": "2026-04-02 13:46:36"
+  },
+  "webtrack_summary": {
+    "primary_run_number": "0170/0198",
+    "primary_order_number": "1689",
+    "stop_numbers": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      69
+    ],
+    "stop_count": 8,
+    "v_lobe_slut_times": [
+      "14:58"
+    ],
+    "last_meaningful_event_time": "2026-04-02 14:58:00",
+    "last_meaningful_event_text": "0170/0198 Modtaget 1689 020426 PLA 07:00--14:58 V.LØBE SLUT 14:58 ZON: 00000 Køretid by: 5 Land: 162 Ventetid by: 14 Land: 5 Betaling 1376.52 Sum Egenbet.: 0",
+    "last_order_with_address": {
+      "timestamp": "2026-04-02 12:59:00",
+      "address": "VORDINGBORG LANDEVEJ 19, 4700",
+      "raw_text": "0170/0198 Modtaget 69 AFLEV 13:29 1689 OLE MADSEN M81ÅR VORDINGBORG LANDEVEJ 19 PN:4700"
+    }
+  },
+  "segment_count": 1,
+  "segments": [
+    {
+      "start_time": "2026-04-02 10:37:15",
+      "end_time": "2026-04-02 13:39:23",
+      "start_point": {
+        "timestamp": "2026-04-02 10:37:15",
+        "latitude": 55.225662,
+        "longitude": 11.752256,
+        "distance_to_home_m": 310.6,
+        "speed": 40.0,
+        "status": "Moving",
+        "address": "Fabriksvej , 4700 Næstved, Danmark",
+        "inside_home_zone": false
+      },
+      "end_point": {
+        "timestamp": "2026-04-02 13:39:23",
+        "latitude": 55.225483,
+        "longitude": 11.750386,
+        "distance_to_home_m": 191.6,
+        "speed": 27.0,
+        "status": "Moving",
+        "address": "Fabriksvej 48D, 4700 Næstved, Danmark",
+        "inside_home_zone": true
+      },
+      "closure_reason": "valid_home_return_with_stop_or_end_of_data",
+      "is_estimated_end": false
+    }
+  ],
+  "computed_start_time": "10:37",
+  "computed_end_time": "13:39",
+  "total_work_minutes": 182,
+  "end_time_basis_label": "Første gyldige indkørsel i hjemmezone",
+  "estimation_note": null,
+  "segment_debug": {
+    "closest_distance_m": 0.0,
+    "runs": [
+      {
+        "inside": true,
+        "point_count": 7,
+        "start": "2026-04-02 10:36:20",
+        "end": "2026-04-02 10:37:06",
+        "duration_seconds": 46,
+        "min_distance_m": 15.1,
+        "max_distance_m": 199.7
+      },
+      {
+        "inside": false,
+        "point_count": 237,
+        "start": "2026-04-02 10:37:15",
+        "end": "2026-04-02 13:38:46",
+        "duration_seconds": 10891,
+        "min_distance_m": 310.6,
+        "max_distance_m": 52754.4
+      },
+      {
+        "inside": true,
+        "point_count": 11,
+        "start": "2026-04-02 13:39:23",
+        "end": "2026-04-02 13:46:36",
+        "duration_seconds": 433,
+        "min_distance_m": 0.0,
+        "max_distance_m": 191.6
+      }
+    ],
+    "rejected_returns": [],
+    "open_segment_after_scan": null
+  },
+  "fallback": null,
+  "gps_points_for_map": [
+    {
+      "timestamp": "2026-04-02 10:36:20",
+      "latitude": 55.225422,
+      "longitude": 11.747195,
+      "distance_to_home_m": 15.1,
+      "speed": 18.0,
+      "status": "Paused",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 10:36:21",
+      "latitude": 55.225376,
+      "longitude": 11.747143,
+      "distance_to_home_m": 21.1,
+      "speed": 20.0,
+      "status": "Start",
+      "address": "Toftevej 10, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 10:36:22",
+      "latitude": 55.225327,
+      "longitude": 11.74712,
+      "distance_to_home_m": 26.2,
+      "speed": 17.0,
+      "status": "Moving",
+      "address": "Toftevej 10, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 10:36:33",
+      "latitude": 55.225338,
+      "longitude": 11.747198,
+      "distance_to_home_m": 22.5,
+      "speed": 17.0,
+      "status": "Moving",
+      "address": "Toftevej 10, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 10:36:47",
+      "latitude": 55.226299,
+      "longitude": 11.748872,
+      "distance_to_home_m": 129.2,
+      "speed": 14.0,
+      "status": "Moving",
+      "address": "Mosevej 12D, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 10:36:59",
+      "latitude": 55.225555,
+      "longitude": 11.750183,
+      "distance_to_home_m": 178.8,
+      "speed": 26.0,
+      "status": "Moving",
+      "address": "Mosevej, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 10:37:06",
+      "latitude": 55.225414,
+      "longitude": 11.750508,
+      "distance_to_home_m": 199.7,
+      "speed": 25.0,
+      "status": "Moving",
+      "address": "Fabriksvej, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 10:37:15",
+      "latitude": 55.225662,
+      "longitude": 11.752256,
+      "distance_to_home_m": 310.6,
+      "speed": 40.0,
+      "status": "Moving",
+      "address": "Fabriksvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:38:15",
+      "latitude": 55.228985,
+      "longitude": 11.75484,
+      "distance_to_home_m": 611.1,
+      "speed": 33.0,
+      "status": "Moving",
+      "address": "Fabriksvej 1A, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:38:26",
+      "latitude": 55.229515,
+      "longitude": 11.75522,
+      "distance_to_home_m": 667.7,
+      "speed": 23.0,
+      "status": "Moving",
+      "address": "Havnegade 11, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:38:54",
+      "latitude": 55.231297,
+      "longitude": 11.754049,
+      "distance_to_home_m": 769.9,
+      "speed": 40.0,
+      "status": "Moving",
+      "address": "Møllegade 1A, 1.sal., 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:39:30",
+      "latitude": 55.233547,
+      "longitude": 11.75618,
+      "distance_to_home_m": 1053.4,
+      "speed": 27.0,
+      "status": "Moving",
+      "address": "Rådmandshaven , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:39:35",
+      "latitude": 55.23381,
+      "longitude": 11.756042,
+      "distance_to_home_m": 1073.8,
+      "speed": 29.0,
+      "status": "Moving",
+      "address": "Rådmandsengen , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:39:38",
+      "latitude": 55.234035,
+      "longitude": 11.756408,
+      "distance_to_home_m": 1107.2,
+      "speed": 39.0,
+      "status": "Moving",
+      "address": "Rådmandsengen , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:39:46",
+      "latitude": 55.234573,
+      "longitude": 11.757575,
+      "distance_to_home_m": 1197.2,
+      "speed": 35.0,
+      "status": "Moving",
+      "address": "Rådmandsengen , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:40:46",
+      "latitude": 55.237106,
+      "longitude": 11.758487,
+      "distance_to_home_m": 1469.0,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Ringstedgade 61K, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:41:44",
+      "latitude": 55.237633,
+      "longitude": 11.758821,
+      "distance_to_home_m": 1530.6,
+      "speed": 28.0,
+      "status": "Moving",
+      "address": "Ringstedgade , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:41:52",
+      "latitude": 55.23774,
+      "longitude": 11.759577,
+      "distance_to_home_m": 1564.3,
+      "speed": 7.0,
+      "status": "Moving",
+      "address": "Ringstedgade 75A, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:41:55",
+      "latitude": 55.237663,
+      "longitude": 11.759608,
+      "distance_to_home_m": 1557.8,
+      "speed": 15.0,
+      "status": "Moving",
+      "address": "Herlufsvænge , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:42:03",
+      "latitude": 55.237343,
+      "longitude": 11.759655,
+      "distance_to_home_m": 1528.6,
+      "speed": 15.0,
+      "status": "Moving",
+      "address": "Ringstedgade 61D, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:42:21",
+      "latitude": 55.237305,
+      "longitude": 11.760718,
+      "distance_to_home_m": 1560.5,
+      "speed": 18.0,
+      "status": "Moving",
+      "address": "Ringstedgade 68, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:43:21",
+      "latitude": 55.23444,
+      "longitude": 11.760295,
+      "distance_to_home_m": 1287.1,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Ringstedgade 28, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:43:47",
+      "latitude": 55.234085,
+      "longitude": 11.760324,
+      "distance_to_home_m": 1258.2,
+      "speed": 23.0,
+      "status": "Moving",
+      "address": "Farimagsvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:44:47",
+      "latitude": 55.229343,
+      "longitude": 11.766996,
+      "distance_to_home_m": 1315.6,
+      "speed": 28.0,
+      "status": "Moving",
+      "address": "Farimagsvej 55, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:45:03",
+      "latitude": 55.228935,
+      "longitude": 11.767185,
+      "distance_to_home_m": 1313.1,
+      "speed": 28.0,
+      "status": "Moving",
+      "address": "Rampen 1, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:45:15",
+      "latitude": 55.228756,
+      "longitude": 11.769268,
+      "distance_to_home_m": 1435.0,
+      "speed": 36.0,
+      "status": "Moving",
+      "address": "Rampen 12, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:45:26",
+      "latitude": 55.228973,
+      "longitude": 11.770298,
+      "distance_to_home_m": 1504.3,
+      "speed": 23.0,
+      "status": "Moving",
+      "address": "Ny Præstøvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:46:26",
+      "latitude": 55.224018,
+      "longitude": 11.77966,
+      "distance_to_home_m": 2055.0,
+      "speed": 49.0,
+      "status": "Moving",
+      "address": "Ny Præstøvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:46:49",
+      "latitude": 55.223137,
+      "longitude": 11.783531,
+      "distance_to_home_m": 2308.9,
+      "speed": 20.0,
+      "status": "Moving",
+      "address": ", 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:46:54",
+      "latitude": 55.222885,
+      "longitude": 11.783645,
+      "distance_to_home_m": 2319.5,
+      "speed": 24.0,
+      "status": "Moving",
+      "address": ", 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:46:56",
+      "latitude": 55.2229,
+      "longitude": 11.783834,
+      "distance_to_home_m": 2331.2,
+      "speed": 18.0,
+      "status": "Moving",
+      "address": ", 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:47:17",
+      "latitude": 55.22242,
+      "longitude": 11.787583,
+      "distance_to_home_m": 2573.9,
+      "speed": 60.0,
+      "status": "Moving",
+      "address": "Ny Præstøvej 102, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:48:17",
+      "latitude": 55.213535,
+      "longitude": 11.797379,
+      "distance_to_home_m": 3440.8,
+      "speed": 82.0,
+      "status": "Moving",
+      "address": "Ny Præstøvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:49:17",
+      "latitude": 55.206242,
+      "longitude": 11.810763,
+      "distance_to_home_m": 4557.1,
+      "speed": 63.0,
+      "status": "Moving",
+      "address": "Ny Præstøvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:50:17",
+      "latitude": 55.201965,
+      "longitude": 11.821126,
+      "distance_to_home_m": 5362.3,
+      "speed": 69.0,
+      "status": "Moving",
+      "address": "Ny Præstøvej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:51:17",
+      "latitude": 55.196365,
+      "longitude": 11.838794,
+      "distance_to_home_m": 6644.8,
+      "speed": 73.0,
+      "status": "Moving",
+      "address": "Præstø Landevej 18, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:52:17",
+      "latitude": 55.18985,
+      "longitude": 11.851622,
+      "distance_to_home_m": 7712.7,
+      "speed": 77.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:53:17",
+      "latitude": 55.184383,
+      "longitude": 11.864365,
+      "distance_to_home_m": 8719.8,
+      "speed": 50.0,
+      "status": "Moving",
+      "address": "Præstø Landevej 33, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:54:17",
+      "latitude": 55.177189,
+      "longitude": 11.874267,
+      "distance_to_home_m": 9681.4,
+      "speed": 63.0,
+      "status": "Moving",
+      "address": "Præstø Landevej 52, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:55:17",
+      "latitude": 55.16901,
+      "longitude": 11.881679,
+      "distance_to_home_m": 10589.7,
+      "speed": 51.0,
+      "status": "Moving",
+      "address": "Præstø Landevej 57, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:56:17",
+      "latitude": 55.158489,
+      "longitude": 11.886978,
+      "distance_to_home_m": 11579.3,
+      "speed": 96.0,
+      "status": "Moving",
+      "address": "Præstø Landevej 78, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:57:17",
+      "latitude": 55.146156,
+      "longitude": 11.897482,
+      "distance_to_home_m": 12988.1,
+      "speed": 74.0,
+      "status": "Moving",
+      "address": "Nyskovvej 1, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:58:17",
+      "latitude": 55.139488,
+      "longitude": 11.913245,
+      "distance_to_home_m": 14227.4,
+      "speed": 82.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:59:17",
+      "latitude": 55.133144,
+      "longitude": 11.929235,
+      "distance_to_home_m": 15454.7,
+      "speed": 68.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:59:40",
+      "latitude": 55.130905,
+      "longitude": 11.932761,
+      "distance_to_home_m": 15787.7,
+      "speed": 25.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 10:59:52",
+      "latitude": 55.129639,
+      "longitude": 11.932319,
+      "distance_to_home_m": 15861.2,
+      "speed": 55.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:00:52",
+      "latitude": 55.111328,
+      "longitude": 11.935888,
+      "distance_to_home_m": 17452.2,
+      "speed": 138.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:01:49",
+      "latitude": 55.093357,
+      "longitude": 11.94026,
+      "distance_to_home_m": 19134.0,
+      "speed": 126.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:02:45",
+      "latitude": 55.077972,
+      "longitude": 11.956884,
+      "distance_to_home_m": 21127.7,
+      "speed": 129.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:03:40",
+      "latitude": 55.061249,
+      "longitude": 11.969936,
+      "distance_to_home_m": 23102.1,
+      "speed": 138.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:04:34",
+      "latitude": 55.045246,
+      "longitude": 11.986374,
+      "distance_to_home_m": 25151.8,
+      "speed": 130.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:05:34",
+      "latitude": 55.027008,
+      "longitude": 11.985912,
+      "distance_to_home_m": 26781.4,
+      "speed": 133.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:06:32",
+      "latitude": 55.008499,
+      "longitude": 11.987708,
+      "distance_to_home_m": 28564.3,
+      "speed": 130.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:07:29",
+      "latitude": 54.991577,
+      "longitude": 11.998955,
+      "distance_to_home_m": 30541.0,
+      "speed": 127.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:08:27",
+      "latitude": 54.973671,
+      "longitude": 12.004157,
+      "distance_to_home_m": 32421.1,
+      "speed": 127.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:09:27",
+      "latitude": 54.960632,
+      "longitude": 11.996353,
+      "distance_to_home_m": 33444.5,
+      "speed": 78.0,
+      "status": "Moving",
+      "address": "Fredskovvej , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:10:27",
+      "latitude": 54.949902,
+      "longitude": 11.984217,
+      "distance_to_home_m": 34153.1,
+      "speed": 85.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:11:27",
+      "latitude": 54.939678,
+      "longitude": 11.968752,
+      "distance_to_home_m": 34767.2,
+      "speed": 94.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:12:27",
+      "latitude": 54.928719,
+      "longitude": 11.948842,
+      "distance_to_home_m": 35406.8,
+      "speed": 112.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:13:27",
+      "latitude": 54.914299,
+      "longitude": 11.931125,
+      "distance_to_home_m": 36530.0,
+      "speed": 125.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:14:23",
+      "latitude": 54.897209,
+      "longitude": 11.921248,
+      "distance_to_home_m": 38148.6,
+      "speed": 125.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:15:23",
+      "latitude": 54.881454,
+      "longitude": 11.907407,
+      "distance_to_home_m": 39592.8,
+      "speed": 122.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:16:23",
+      "latitude": 54.870983,
+      "longitude": 11.881614,
+      "distance_to_home_m": 40339.3,
+      "speed": 112.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:17:23",
+      "latitude": 54.863449,
+      "longitude": 11.856048,
+      "distance_to_home_m": 40851.2,
+      "speed": 118.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:18:22",
+      "latitude": 54.85083,
+      "longitude": 11.83365,
+      "distance_to_home_m": 42024.5,
+      "speed": 125.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:19:22",
+      "latitude": 54.839577,
+      "longitude": 11.816042,
+      "distance_to_home_m": 43137.2,
+      "speed": 93.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen, E 47, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:20:22",
+      "latitude": 54.834885,
+      "longitude": 11.8002,
+      "distance_to_home_m": 43566.6,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Froensevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:20:42",
+      "latitude": 54.833,
+      "longitude": 11.791799,
+      "distance_to_home_m": 43737.7,
+      "speed": 78.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:21:42",
+      "latitude": 54.829525,
+      "longitude": 11.763011,
+      "distance_to_home_m": 44043.6,
+      "speed": 125.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4862 Guldborg, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:22:42",
+      "latitude": 54.826649,
+      "longitude": 11.731813,
+      "distance_to_home_m": 44363.2,
+      "speed": 119.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4862 Guldborg, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:23:42",
+      "latitude": 54.819988,
+      "longitude": 11.702683,
+      "distance_to_home_m": 45182.6,
+      "speed": 123.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen 454, 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:24:42",
+      "latitude": 54.807194,
+      "longitude": 11.683425,
+      "distance_to_home_m": 46693.7,
+      "speed": 121.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4862 Guldborg, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:25:42",
+      "latitude": 54.794872,
+      "longitude": 11.660336,
+      "distance_to_home_m": 48206.0,
+      "speed": 97.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen, E 47, 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:26:27",
+      "latitude": 54.791462,
+      "longitude": 11.641677,
+      "distance_to_home_m": 48732.9,
+      "speed": 105.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:27:27",
+      "latitude": 54.79216,
+      "longitude": 11.614538,
+      "distance_to_home_m": 48925.8,
+      "speed": 103.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:28:27",
+      "latitude": 54.78812,
+      "longitude": 11.588319,
+      "distance_to_home_m": 49682.5,
+      "speed": 104.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:29:27",
+      "latitude": 54.78978,
+      "longitude": 11.562114,
+      "distance_to_home_m": 49870.9,
+      "speed": 108.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:30:27",
+      "latitude": 54.790638,
+      "longitude": 11.533588,
+      "distance_to_home_m": 50240.9,
+      "speed": 119.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:31:27",
+      "latitude": 54.785324,
+      "longitude": 11.506351,
+      "distance_to_home_m": 51303.5,
+      "speed": 108.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:32:24",
+      "latitude": 54.780582,
+      "longitude": 11.484406,
+      "distance_to_home_m": 52239.3,
+      "speed": 60.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:32:40",
+      "latitude": 54.78109,
+      "longitude": 11.480335,
+      "distance_to_home_m": 52269.8,
+      "speed": 54.0,
+      "status": "Moving",
+      "address": "Vestre Landevej 10A, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:32:51",
+      "latitude": 54.780621,
+      "longitude": 11.4792,
+      "distance_to_home_m": 52342.8,
+      "speed": 21.0,
+      "status": "Moving",
+      "address": "Vestre Landevej 10, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:32:54",
+      "latitude": 54.78043,
+      "longitude": 11.47929,
+      "distance_to_home_m": 52361.0,
+      "speed": 30.0,
+      "status": "Moving",
+      "address": "Vestre Landevej , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:33:46",
+      "latitude": 54.775291,
+      "longitude": 11.486529,
+      "distance_to_home_m": 52754.4,
+      "speed": 21.0,
+      "status": "Moving",
+      "address": "153 , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:34:46",
+      "latitude": 54.775303,
+      "longitude": 11.495905,
+      "distance_to_home_m": 52567.6,
+      "speed": 22.0,
+      "status": "Moving",
+      "address": "Vestergade 42C, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:35:21",
+      "latitude": 54.774357,
+      "longitude": 11.498645,
+      "distance_to_home_m": 52614.9,
+      "speed": 10.0,
+      "status": "Moving",
+      "address": "Vestergade 16B, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:36:21",
+      "latitude": 54.774311,
+      "longitude": 11.49859,
+      "distance_to_home_m": 52620.8,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Vestergade , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:36:31",
+      "latitude": 54.774311,
+      "longitude": 11.49859,
+      "distance_to_home_m": 52620.8,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Vestergade , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:37:23",
+      "latitude": 54.774311,
+      "longitude": 11.49859,
+      "distance_to_home_m": 52620.8,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Vestergade , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:37:30",
+      "latitude": 54.774311,
+      "longitude": 11.49859,
+      "distance_to_home_m": 52620.8,
+      "speed": 0.0,
+      "status": "Stop",
+      "address": "Vestergade , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:38:38",
+      "latitude": 54.774311,
+      "longitude": 11.49859,
+      "distance_to_home_m": 52620.8,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Vestergade , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:38:38",
+      "latitude": 54.774311,
+      "longitude": 11.49859,
+      "distance_to_home_m": 52620.8,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Vestergade , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:38:54",
+      "latitude": 54.774303,
+      "longitude": 11.498692,
+      "distance_to_home_m": 52619.7,
+      "speed": 7.0,
+      "status": "Paused",
+      "address": "Vestergade 16B, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:38:54",
+      "latitude": 54.774303,
+      "longitude": 11.498692,
+      "distance_to_home_m": 52619.7,
+      "speed": 7.0,
+      "status": "Start",
+      "address": "Vestergade 16B, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:39:09",
+      "latitude": 54.77422,
+      "longitude": 11.499152,
+      "distance_to_home_m": 52619.7,
+      "speed": 8.0,
+      "status": "Moving",
+      "address": "Vestergade 10, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:39:31",
+      "latitude": 54.774475,
+      "longitude": 11.501039,
+      "distance_to_home_m": 52556.5,
+      "speed": 8.0,
+      "status": "Moving",
+      "address": "Torvet 2, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:39:35",
+      "latitude": 54.774437,
+      "longitude": 11.501122,
+      "distance_to_home_m": 52559.0,
+      "speed": 8.0,
+      "status": "Moving",
+      "address": "Torvet 2, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:39:58",
+      "latitude": 54.773396,
+      "longitude": 11.501606,
+      "distance_to_home_m": 52660.3,
+      "speed": 24.0,
+      "status": "Moving",
+      "address": "Torvet 24, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:40:49",
+      "latitude": 54.77351,
+      "longitude": 11.507363,
+      "distance_to_home_m": 52540.1,
+      "speed": 15.0,
+      "status": "Moving",
+      "address": "Skimminge 7, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:41:08",
+      "latitude": 54.774368,
+      "longitude": 11.507968,
+      "distance_to_home_m": 52437.5,
+      "speed": 7.0,
+      "status": "Moving",
+      "address": "Østergade 52A, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:42:08",
+      "latitude": 54.777439,
+      "longitude": 11.516943,
+      "distance_to_home_m": 51945.9,
+      "speed": 24.0,
+      "status": "Moving",
+      "address": "153 , 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:43:08",
+      "latitude": 54.780174,
+      "longitude": 11.527551,
+      "distance_to_home_m": 51465.8,
+      "speed": 40.0,
+      "status": "Moving",
+      "address": "Østre Landevej 90, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:44:08",
+      "latitude": 54.784134,
+      "longitude": 11.544579,
+      "distance_to_home_m": 50754.6,
+      "speed": 80.0,
+      "status": "Moving",
+      "address": "Østre Landevej 119, 4930 Maribo, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:45:08",
+      "latitude": 54.788456,
+      "longitude": 11.56277,
+      "distance_to_home_m": 50004.2,
+      "speed": 31.0,
+      "status": "Moving",
+      "address": "Maribovej 150, 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:45:12",
+      "latitude": 54.788338,
+      "longitude": 11.563193,
+      "distance_to_home_m": 50010.6,
+      "speed": 33.0,
+      "status": "Moving",
+      "address": "Maribovej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:45:18",
+      "latitude": 54.788101,
+      "longitude": 11.564151,
+      "distance_to_home_m": 50021.9,
+      "speed": 47.0,
+      "status": "Moving",
+      "address": "Maribovej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:46:18",
+      "latitude": 54.788082,
+      "longitude": 11.588615,
+      "distance_to_home_m": 49682.8,
+      "speed": 110.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:47:18",
+      "latitude": 54.79229,
+      "longitude": 11.616282,
+      "distance_to_home_m": 48892.4,
+      "speed": 113.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:48:18",
+      "latitude": 54.791245,
+      "longitude": 11.644363,
+      "distance_to_home_m": 48733.4,
+      "speed": 104.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:48:59",
+      "latitude": 54.792953,
+      "longitude": 11.659872,
+      "distance_to_home_m": 48421.4,
+      "speed": 77.0,
+      "status": "Moving",
+      "address": "Nykøbingvej 102, 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:49:09",
+      "latitude": 54.793682,
+      "longitude": 11.661137,
+      "distance_to_home_m": 48331.6,
+      "speed": 27.0,
+      "status": "Moving",
+      "address": "Nykøbingvej , 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:50:09",
+      "latitude": 54.788589,
+      "longitude": 11.681091,
+      "distance_to_home_m": 48767.6,
+      "speed": 69.0,
+      "status": "Moving",
+      "address": "Nykøbingvej 110B, 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:51:09",
+      "latitude": 54.784603,
+      "longitude": 11.696722,
+      "distance_to_home_m": 49133.6,
+      "speed": 70.0,
+      "status": "Moving",
+      "address": "Nykøbingvej 144, 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:52:09",
+      "latitude": 54.779572,
+      "longitude": 11.71644,
+      "distance_to_home_m": 49626.0,
+      "speed": 77.0,
+      "status": "Moving",
+      "address": "Nykøbingvej 285, 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:53:09",
+      "latitude": 54.77467,
+      "longitude": 11.735595,
+      "distance_to_home_m": 50137.5,
+      "speed": 79.0,
+      "status": "Moving",
+      "address": "Nykøbingvej 327, 4990 Sakskøbing, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:54:09",
+      "latitude": 54.769611,
+      "longitude": 11.755146,
+      "distance_to_home_m": 50696.9,
+      "speed": 80.0,
+      "status": "Moving",
+      "address": "Sakskøbingvej 6, 4891 Toreby L, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:55:09",
+      "latitude": 54.762184,
+      "longitude": 11.772777,
+      "distance_to_home_m": 51545.8,
+      "speed": 82.0,
+      "status": "Moving",
+      "address": "Sakskøbingvej , 4891 Toreby L, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:56:09",
+      "latitude": 54.75771,
+      "longitude": 11.793302,
+      "distance_to_home_m": 52100.2,
+      "speed": 76.0,
+      "status": "Moving",
+      "address": "Sakskøbingvej , 4891 Toreby L, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:57:09",
+      "latitude": 54.756275,
+      "longitude": 11.813125,
+      "distance_to_home_m": 52345.7,
+      "speed": 87.0,
+      "status": "Moving",
+      "address": "Sakskøbingvej , 4891 Toreby L, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:58:09",
+      "latitude": 54.757492,
+      "longitude": 11.830095,
+      "distance_to_home_m": 52308.9,
+      "speed": 57.0,
+      "status": "Moving",
+      "address": "Sakskøbingvej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 11:59:09",
+      "latitude": 54.75819,
+      "longitude": 11.845515,
+      "distance_to_home_m": 52340.2,
+      "speed": 60.0,
+      "status": "Moving",
+      "address": "Brovejen , 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:00:09",
+      "latitude": 54.757339,
+      "longitude": 11.856073,
+      "distance_to_home_m": 52518.9,
+      "speed": 36.0,
+      "status": "Moving",
+      "address": "Brovejen , 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:01:09",
+      "latitude": 54.760216,
+      "longitude": 11.869781,
+      "distance_to_home_m": 52325.1,
+      "speed": 48.0,
+      "status": "Moving",
+      "address": "Brovejen , 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:01:59",
+      "latitude": 54.766552,
+      "longitude": 11.8765,
+      "distance_to_home_m": 51695.0,
+      "speed": 43.0,
+      "status": "Moving",
+      "address": "Nykøbing Falster St. (Banegårdspladsen), 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:02:59",
+      "latitude": 54.767704,
+      "longitude": 11.876536,
+      "distance_to_home_m": 51568.9,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Brovejen, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:03:24",
+      "latitude": 54.768127,
+      "longitude": 11.876307,
+      "distance_to_home_m": 51520.1,
+      "speed": 31.0,
+      "status": "Moving",
+      "address": "Engboulevarden , 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:04:24",
+      "latitude": 54.771053,
+      "longitude": 11.868491,
+      "distance_to_home_m": 51121.2,
+      "speed": 39.0,
+      "status": "Moving",
+      "address": "Engboulevarden 14B, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:04:45",
+      "latitude": 54.772621,
+      "longitude": 11.866675,
+      "distance_to_home_m": 50931.4,
+      "speed": 50.0,
+      "status": "Moving",
+      "address": "Engboulevarden 8D, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:05:45",
+      "latitude": 54.776066,
+      "longitude": 11.867097,
+      "distance_to_home_m": 50556.7,
+      "speed": 41.0,
+      "status": "Moving",
+      "address": "Gaabensevej 41, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:06:28",
+      "latitude": 54.780045,
+      "longitude": 11.866832,
+      "distance_to_home_m": 50116.7,
+      "speed": 22.0,
+      "status": "Moving",
+      "address": "Ejegodvej, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:07:05",
+      "latitude": 54.779816,
+      "longitude": 11.860066,
+      "distance_to_home_m": 50078.1,
+      "speed": 25.0,
+      "status": "Moving",
+      "address": "Ejegodvej, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:07:08",
+      "latitude": 54.779686,
+      "longitude": 11.859926,
+      "distance_to_home_m": 50091.2,
+      "speed": 21.0,
+      "status": "Moving",
+      "address": "Fjordvej, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:07:19",
+      "latitude": 54.779129,
+      "longitude": 11.860049,
+      "distance_to_home_m": 50153.6,
+      "speed": 15.0,
+      "status": "Moving",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:07:23",
+      "latitude": 54.779041,
+      "longitude": 11.860207,
+      "distance_to_home_m": 50164.7,
+      "speed": 9.0,
+      "status": "Moving",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:07:25",
+      "latitude": 54.779007,
+      "longitude": 11.860153,
+      "distance_to_home_m": 50168.0,
+      "speed": 7.0,
+      "status": "Moving",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:08:25",
+      "latitude": 54.779007,
+      "longitude": 11.860115,
+      "distance_to_home_m": 50167.6,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:08:33",
+      "latitude": 54.779007,
+      "longitude": 11.860115,
+      "distance_to_home_m": 50167.6,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:09:26",
+      "latitude": 54.779007,
+      "longitude": 11.860115,
+      "distance_to_home_m": 50167.6,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:09:33",
+      "latitude": 54.779007,
+      "longitude": 11.860115,
+      "distance_to_home_m": 50167.6,
+      "speed": 0.0,
+      "status": "Stop",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:23:49",
+      "latitude": 54.779083,
+      "longitude": 11.860049,
+      "distance_to_home_m": 50158.7,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:23:50",
+      "latitude": 54.779083,
+      "longitude": 11.860049,
+      "distance_to_home_m": 50158.7,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:24:43",
+      "latitude": 54.779083,
+      "longitude": 11.860049,
+      "distance_to_home_m": 50158.7,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:24:52",
+      "latitude": 54.779083,
+      "longitude": 11.860049,
+      "distance_to_home_m": 50158.7,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:25:30",
+      "latitude": 54.779083,
+      "longitude": 11.860049,
+      "distance_to_home_m": 50158.7,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Hospitalsvej, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:25:36",
+      "latitude": 54.779102,
+      "longitude": 11.860102,
+      "distance_to_home_m": 50157.1,
+      "speed": 7.0,
+      "status": "Start",
+      "address": "Ejegodvej 61, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:25:47",
+      "latitude": 54.779308,
+      "longitude": 11.859935,
+      "distance_to_home_m": 50132.9,
+      "speed": 14.0,
+      "status": "Moving",
+      "address": "Ejegodvej , 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:26:07",
+      "latitude": 54.779797,
+      "longitude": 11.860089,
+      "distance_to_home_m": 50080.4,
+      "speed": 12.0,
+      "status": "Moving",
+      "address": "Ejegodvej 57, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:26:57",
+      "latitude": 54.78009,
+      "longitude": 11.867004,
+      "distance_to_home_m": 50113.4,
+      "speed": 19.0,
+      "status": "Moving",
+      "address": "Hammerlodden 69, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:27:57",
+      "latitude": 54.785229,
+      "longitude": 11.868403,
+      "distance_to_home_m": 49562.5,
+      "speed": 49.0,
+      "status": "Moving",
+      "address": "Gaabensevej, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:28:54",
+      "latitude": 54.791138,
+      "longitude": 11.87257,
+      "distance_to_home_m": 48956.1,
+      "speed": 29.0,
+      "status": "Moving",
+      "address": "Gaabensevej , 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:29:54",
+      "latitude": 54.801434,
+      "longitude": 11.871577,
+      "distance_to_home_m": 47816.2,
+      "speed": 66.0,
+      "status": "Moving",
+      "address": "Gaabensevej , 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:30:54",
+      "latitude": 54.807739,
+      "longitude": 11.87142,
+      "distance_to_home_m": 47123.2,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Gaabensevej 212, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:31:54",
+      "latitude": 54.814625,
+      "longitude": 11.869658,
+      "distance_to_home_m": 46349.4,
+      "speed": 60.0,
+      "status": "Moving",
+      "address": "Gaabensevej 213B, 4800 Nykøbing F, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:32:54",
+      "latitude": 54.825214,
+      "longitude": 11.866926,
+      "distance_to_home_m": 45159.3,
+      "speed": 76.0,
+      "status": "Moving",
+      "address": "Gaabensevej 292, 4800 Nykøbing Falster, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:33:54",
+      "latitude": 54.83593,
+      "longitude": 11.861231,
+      "distance_to_home_m": 43923.7,
+      "speed": 74.0,
+      "status": "Moving",
+      "address": "Gaabensevej 263, 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:34:54",
+      "latitude": 54.8466,
+      "longitude": 11.858187,
+      "distance_to_home_m": 42721.3,
+      "speed": 60.0,
+      "status": "Moving",
+      "address": "Nykøbingvej , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:35:54",
+      "latitude": 54.854523,
+      "longitude": 11.855888,
+      "distance_to_home_m": 41828.1,
+      "speed": 43.0,
+      "status": "Moving",
+      "address": "Eskilstrup Vestergade 76, 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:36:41",
+      "latitude": 54.862041,
+      "longitude": 11.85428,
+      "distance_to_home_m": 40986.6,
+      "speed": 75.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:37:41",
+      "latitude": 54.869976,
+      "longitude": 11.878507,
+      "distance_to_home_m": 40407.4,
+      "speed": 122.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:38:38",
+      "latitude": 54.87991,
+      "longitude": 11.905118,
+      "distance_to_home_m": 39721.6,
+      "speed": 127.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:39:38",
+      "latitude": 54.895519,
+      "longitude": 11.920611,
+      "distance_to_home_m": 38316.8,
+      "speed": 119.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:40:35",
+      "latitude": 54.912941,
+      "longitude": 11.930403,
+      "distance_to_home_m": 36658.5,
+      "speed": 124.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4863 Eskilstrup, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:41:34",
+      "latitude": 54.928051,
+      "longitude": 11.947654,
+      "distance_to_home_m": 35448.9,
+      "speed": 120.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:42:34",
+      "latitude": 54.937695,
+      "longitude": 11.965995,
+      "distance_to_home_m": 34898.7,
+      "speed": 83.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:43:34",
+      "latitude": 54.947353,
+      "longitude": 11.980677,
+      "distance_to_home_m": 34309.8,
+      "speed": 86.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:44:34",
+      "latitude": 54.957069,
+      "longitude": 11.99338,
+      "distance_to_home_m": 33706.0,
+      "speed": 86.0,
+      "status": "Moving",
+      "address": "Farøbroerne, 4793 Bogø By, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:45:34",
+      "latitude": 54.969082,
+      "longitude": 12.002325,
+      "distance_to_home_m": 32805.5,
+      "speed": 88.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:46:34",
+      "latitude": 54.984447,
+      "longitude": 12.003701,
+      "distance_to_home_m": 31375.6,
+      "speed": 112.0,
+      "status": "Moving",
+      "address": "Sydmotorvejen , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:47:34",
+      "latitude": 54.999207,
+      "longitude": 11.994828,
+      "distance_to_home_m": 29680.9,
+      "speed": 61.0,
+      "status": "Moving",
+      "address": "Mønsvej , 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:47:42",
+      "latitude": 54.999653,
+      "longitude": 11.995107,
+      "distance_to_home_m": 29648.2,
+      "speed": 12.0,
+      "status": "Moving",
+      "address": "Mønsvej, 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:47:46",
+      "latitude": 54.999622,
+      "longitude": 11.995566,
+      "distance_to_home_m": 29666.7,
+      "speed": 40.0,
+      "status": "Moving",
+      "address": "Mønsvej 130, 4760 Vordingborg, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:48:46",
+      "latitude": 54.99728,
+      "longitude": 12.008026,
+      "distance_to_home_m": 30313.8,
+      "speed": 56.0,
+      "status": "Moving",
+      "address": "Vestenbækvej, 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:49:46",
+      "latitude": 54.995552,
+      "longitude": 12.02133,
+      "distance_to_home_m": 30943.5,
+      "speed": 47.0,
+      "status": "Moving",
+      "address": "Vordingborgvej 6, 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:50:40",
+      "latitude": 54.995571,
+      "longitude": 12.030446,
+      "distance_to_home_m": 31271.9,
+      "speed": 19.0,
+      "status": "Moving",
+      "address": "Skovhusevej 1, 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:51:40",
+      "latitude": 55.002171,
+      "longitude": 12.031181,
+      "distance_to_home_m": 30701.4,
+      "speed": 58.0,
+      "status": "Moving",
+      "address": "Skovhusevej 24, 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:52:40",
+      "latitude": 55.010899,
+      "longitude": 12.030855,
+      "distance_to_home_m": 29908.1,
+      "speed": 82.0,
+      "status": "Moving",
+      "address": ", 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:53:40",
+      "latitude": 55.02103,
+      "longitude": 12.034209,
+      "distance_to_home_m": 29148.7,
+      "speed": 76.0,
+      "status": "Moving",
+      "address": ", 4773 Stensved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:54:40",
+      "latitude": 55.028622,
+      "longitude": 12.039317,
+      "distance_to_home_m": 28702.9,
+      "speed": 65.0,
+      "status": "Moving",
+      "address": "Møllebakken 5, 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:55:26",
+      "latitude": 55.029869,
+      "longitude": 12.051438,
+      "distance_to_home_m": 29103.1,
+      "speed": 36.0,
+      "status": "Moving",
+      "address": "Møllebakken , 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:55:42",
+      "latitude": 55.031525,
+      "longitude": 12.053666,
+      "distance_to_home_m": 29060.2,
+      "speed": 59.0,
+      "status": "Moving",
+      "address": "Møllebakken , 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:56:02",
+      "latitude": 55.032204,
+      "longitude": 12.05714,
+      "distance_to_home_m": 29152.8,
+      "speed": 25.0,
+      "status": "Moving",
+      "address": "Lilliendalsvej 39, 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:57:02",
+      "latitude": 55.041748,
+      "longitude": 12.057106,
+      "distance_to_home_m": 28376.2,
+      "speed": 49.0,
+      "status": "Moving",
+      "address": "Lilliendalsvej 27, 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:57:55",
+      "latitude": 55.047943,
+      "longitude": 12.057196,
+      "distance_to_home_m": 27887.3,
+      "speed": 10.0,
+      "status": "Moving",
+      "address": "Lilliendalsvej 1, 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:57:58",
+      "latitude": 55.047955,
+      "longitude": 12.057384,
+      "distance_to_home_m": 27894.7,
+      "speed": 19.0,
+      "status": "Moving",
+      "address": "Ørslevvej 277, 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:58:04",
+      "latitude": 55.047989,
+      "longitude": 12.057854,
+      "distance_to_home_m": 27913.2,
+      "speed": 17.0,
+      "status": "Moving",
+      "address": "Gammel Præstøvej 2, 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:58:42",
+      "latitude": 55.052299,
+      "longitude": 12.057462,
+      "distance_to_home_m": 27557.7,
+      "speed": 41.0,
+      "status": "Moving",
+      "address": "Gammel Præstøvej 24, 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 12:59:42",
+      "latitude": 55.060558,
+      "longitude": 12.051833,
+      "distance_to_home_m": 26661.7,
+      "speed": 68.0,
+      "status": "Moving",
+      "address": "Gammel Præstøvej , 4735 Mern, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:00:42",
+      "latitude": 55.069355,
+      "longitude": 12.045005,
+      "distance_to_home_m": 25675.5,
+      "speed": 62.0,
+      "status": "Moving",
+      "address": "Mønvej 160, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:01:42",
+      "latitude": 55.078053,
+      "longitude": 12.038617,
+      "distance_to_home_m": 24724.8,
+      "speed": 51.0,
+      "status": "Moving",
+      "address": "Mønvej 125D, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:02:14",
+      "latitude": 55.080948,
+      "longitude": 12.036618,
+      "distance_to_home_m": 24416.3,
+      "speed": 19.0,
+      "status": "Moving",
+      "address": "Rekkendevej 2, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:02:17",
+      "latitude": 55.080921,
+      "longitude": 12.036843,
+      "distance_to_home_m": 24429.0,
+      "speed": 25.0,
+      "status": "Moving",
+      "address": "Rekkendevej 2, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:03:17",
+      "latitude": 55.081043,
+      "longitude": 12.043068,
+      "distance_to_home_m": 24719.3,
+      "speed": 46.0,
+      "status": "Moving",
+      "address": "Rekkendevej 20, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:03:33",
+      "latitude": 55.080978,
+      "longitude": 12.045208,
+      "distance_to_home_m": 24827.5,
+      "speed": 12.0,
+      "status": "Moving",
+      "address": "Rekkendevej 29B, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:03:42",
+      "latitude": 55.080948,
+      "longitude": 12.045087,
+      "distance_to_home_m": 24823.8,
+      "speed": 15.0,
+      "status": "Moving",
+      "address": "Rekkendevej 29B, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:04:28",
+      "latitude": 55.081017,
+      "longitude": 12.036371,
+      "distance_to_home_m": 24399.4,
+      "speed": 22.0,
+      "status": "Moving",
+      "address": "Mønvej 105, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:05:28",
+      "latitude": 55.087051,
+      "longitude": 12.03008,
+      "distance_to_home_m": 23657.0,
+      "speed": 53.0,
+      "status": "Moving",
+      "address": "Mønvej 110A, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:06:28",
+      "latitude": 55.094982,
+      "longitude": 12.028334,
+      "distance_to_home_m": 23005.2,
+      "speed": 69.0,
+      "status": "Moving",
+      "address": "Mønvej 47, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:07:28",
+      "latitude": 55.103603,
+      "longitude": 12.033118,
+      "distance_to_home_m": 22653.9,
+      "speed": 62.0,
+      "status": "Moving",
+      "address": "Mønvej 33, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:08:28",
+      "latitude": 55.111462,
+      "longitude": 12.030072,
+      "distance_to_home_m": 21982.2,
+      "speed": 70.0,
+      "status": "Moving",
+      "address": "Mønvej , 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:08:40",
+      "latitude": 55.113605,
+      "longitude": 12.030737,
+      "distance_to_home_m": 21880.0,
+      "speed": 78.0,
+      "status": "Moving",
+      "address": "Mønvej , 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:08:54",
+      "latitude": 55.114674,
+      "longitude": 12.032333,
+      "distance_to_home_m": 21896.1,
+      "speed": 22.0,
+      "status": "Moving",
+      "address": "Ny Esbjergvej , 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:09:46",
+      "latitude": 55.118713,
+      "longitude": 12.019938,
+      "distance_to_home_m": 20992.0,
+      "speed": 81.0,
+      "status": "Moving",
+      "address": "Næstvedvej , 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:10:46",
+      "latitude": 55.116947,
+      "longitude": 11.997654,
+      "distance_to_home_m": 19959.7,
+      "speed": 71.0,
+      "status": "Moving",
+      "address": "Næstvedvej 22, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:11:46",
+      "latitude": 55.119781,
+      "longitude": 11.977101,
+      "distance_to_home_m": 18737.1,
+      "speed": 87.0,
+      "status": "Moving",
+      "address": "Næstvedvej 30, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:12:46",
+      "latitude": 55.122829,
+      "longitude": 11.960961,
+      "distance_to_home_m": 17730.0,
+      "speed": 76.0,
+      "status": "Moving",
+      "address": "Næstvedvej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:13:46",
+      "latitude": 55.125439,
+      "longitude": 11.951322,
+      "distance_to_home_m": 17075.4,
+      "speed": 37.0,
+      "status": "Moving",
+      "address": "Næstvedvej 50, 4720 Præstø, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:14:46",
+      "latitude": 55.12825,
+      "longitude": 11.943563,
+      "distance_to_home_m": 16497.9,
+      "speed": 37.0,
+      "status": "Moving",
+      "address": "Næstvedvej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:15:46",
+      "latitude": 55.132584,
+      "longitude": 11.93046,
+      "distance_to_home_m": 15554.2,
+      "speed": 74.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:16:46",
+      "latitude": 55.139027,
+      "longitude": 11.914639,
+      "distance_to_home_m": 14327.5,
+      "speed": 73.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:17:46",
+      "latitude": 55.144798,
+      "longitude": 11.899306,
+      "distance_to_home_m": 13175.8,
+      "speed": 50.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:18:46",
+      "latitude": 55.154663,
+      "longitude": 11.890322,
+      "distance_to_home_m": 12017.3,
+      "speed": 79.0,
+      "status": "Moving",
+      "address": "Præstø Landevej 82, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:19:46",
+      "latitude": 55.165127,
+      "longitude": 11.883488,
+      "distance_to_home_m": 10942.2,
+      "speed": 44.0,
+      "status": "Moving",
+      "address": "Præstø Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:20:11",
+      "latitude": 55.167374,
+      "longitude": 11.882667,
+      "distance_to_home_m": 10748.8,
+      "speed": 20.0,
+      "status": "Moving",
+      "address": "Blangslevvej 19, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:20:13",
+      "latitude": 55.167355,
+      "longitude": 11.882491,
+      "distance_to_home_m": 10741.2,
+      "speed": 20.0,
+      "status": "Moving",
+      "address": "Blangslevvej 19, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:21:13",
+      "latitude": 55.165627,
+      "longitude": 11.867054,
+      "distance_to_home_m": 10102.1,
+      "speed": 81.0,
+      "status": "Moving",
+      "address": "Blangslevvej 2, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:22:13",
+      "latitude": 55.165031,
+      "longitude": 11.852277,
+      "distance_to_home_m": 9464.2,
+      "speed": 51.0,
+      "status": "Moving",
+      "address": "Landevejen 6, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:23:13",
+      "latitude": 55.161446,
+      "longitude": 11.839798,
+      "distance_to_home_m": 9229.1,
+      "speed": 67.0,
+      "status": "Moving",
+      "address": "Landevejen , 4750 Lundby, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:23:47",
+      "latitude": 55.157433,
+      "longitude": 11.833237,
+      "distance_to_home_m": 9328.6,
+      "speed": 64.0,
+      "status": "Moving",
+      "address": "Landevejen , 4750 Lundby, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:24:47",
+      "latitude": 55.157112,
+      "longitude": 11.819429,
+      "distance_to_home_m": 8875.8,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Landevejen 56, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:24:50",
+      "latitude": 55.15707,
+      "longitude": 11.819308,
+      "distance_to_home_m": 8875.8,
+      "speed": 20.0,
+      "status": "Moving",
+      "address": "Vester Egesborgvej , 4750 Lundby, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:25:19",
+      "latitude": 55.154625,
+      "longitude": 11.818303,
+      "distance_to_home_m": 9078.3,
+      "speed": 7.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej 25, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:25:21",
+      "latitude": 55.154606,
+      "longitude": 11.818366,
+      "distance_to_home_m": 9082.1,
+      "speed": 10.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej 25, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:25:41",
+      "latitude": 55.154392,
+      "longitude": 11.819798,
+      "distance_to_home_m": 9148.1,
+      "speed": 14.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej 19, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:26:22",
+      "latitude": 55.154533,
+      "longitude": 11.819778,
+      "distance_to_home_m": 9133.9,
+      "speed": 6.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej 19, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:26:24",
+      "latitude": 55.154495,
+      "longitude": 11.819743,
+      "distance_to_home_m": 9136.4,
+      "speed": 8.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej 19, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:26:30",
+      "latitude": 55.154354,
+      "longitude": 11.819726,
+      "distance_to_home_m": 9149.5,
+      "speed": 13.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej 19, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:26:36",
+      "latitude": 55.154343,
+      "longitude": 11.819288,
+      "distance_to_home_m": 9136.6,
+      "speed": 18.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej 23-25, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:27:08",
+      "latitude": 55.15469,
+      "longitude": 11.818356,
+      "distance_to_home_m": 9073.7,
+      "speed": 14.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej 25, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:28:08",
+      "latitude": 55.162113,
+      "longitude": 11.81748,
+      "distance_to_home_m": 8337.3,
+      "speed": 80.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:29:08",
+      "latitude": 55.172199,
+      "longitude": 11.806911,
+      "distance_to_home_m": 7030.6,
+      "speed": 81.0,
+      "status": "Moving",
+      "address": "Vordingborg Landevej ,  , Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:30:08",
+      "latitude": 55.178585,
+      "longitude": 11.789317,
+      "distance_to_home_m": 5858.4,
+      "speed": 68.0,
+      "status": "Moving",
+      "address": "Vordingborgvej 376, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:31:08",
+      "latitude": 55.18647,
+      "longitude": 11.77669,
+      "distance_to_home_m": 4723.7,
+      "speed": 75.0,
+      "status": "Moving",
+      "address": "Vordingborgvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:32:08",
+      "latitude": 55.194221,
+      "longitude": 11.768657,
+      "distance_to_home_m": 3733.0,
+      "speed": 69.0,
+      "status": "Moving",
+      "address": "Vordingborgvej 347, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:33:08",
+      "latitude": 55.199245,
+      "longitude": 11.761873,
+      "distance_to_home_m": 3062.9,
+      "speed": 48.0,
+      "status": "Moving",
+      "address": "Vordingborgvej 337, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:34:08",
+      "latitude": 55.206226,
+      "longitude": 11.754823,
+      "distance_to_home_m": 2196.6,
+      "speed": 60.0,
+      "status": "Moving",
+      "address": "Vordingborgvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:35:08",
+      "latitude": 55.214005,
+      "longitude": 11.753393,
+      "distance_to_home_m": 1336.0,
+      "speed": 63.0,
+      "status": "Moving",
+      "address": "Vordingborgvej , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:36:07",
+      "latitude": 55.219051,
+      "longitude": 11.754599,
+      "distance_to_home_m": 852.9,
+      "speed": 56.0,
+      "status": "Moving",
+      "address": "Vordingborgvej 79, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:36:56",
+      "latitude": 55.222855,
+      "longitude": 11.759391,
+      "distance_to_home_m": 818.1,
+      "speed": 27.0,
+      "status": "Moving",
+      "address": "Nygårdsvej 2, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:37:43",
+      "latitude": 55.227547,
+      "longitude": 11.757442,
+      "distance_to_home_m": 677.8,
+      "speed": 15.0,
+      "status": "Moving",
+      "address": "Havnegade , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:37:44",
+      "latitude": 55.22747,
+      "longitude": 11.75728,
+      "distance_to_home_m": 665.2,
+      "speed": 23.0,
+      "status": "Moving",
+      "address": "Toldbodgade , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:37:51",
+      "latitude": 55.227253,
+      "longitude": 11.756759,
+      "distance_to_home_m": 626.2,
+      "speed": 23.0,
+      "status": "Moving",
+      "address": "Toldbodgade 4, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:37:53",
+      "latitude": 55.227352,
+      "longitude": 11.756585,
+      "distance_to_home_m": 619.3,
+      "speed": 28.0,
+      "status": "Moving",
+      "address": "Toldbodgade 4, 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:38:39",
+      "latitude": 55.228275,
+      "longitude": 11.754521,
+      "distance_to_home_m": 547.7,
+      "speed": 7.0,
+      "status": "Moving",
+      "address": "Toldbodgade , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:38:46",
+      "latitude": 55.228226,
+      "longitude": 11.754318,
+      "distance_to_home_m": 534.0,
+      "speed": 17.0,
+      "status": "Moving",
+      "address": "Toldbodgade , 4700 Næstved, Danmark",
+      "inside_home_zone": false
+    },
+    {
+      "timestamp": "2026-04-02 13:39:23",
+      "latitude": 55.225483,
+      "longitude": 11.750386,
+      "distance_to_home_m": 191.6,
+      "speed": 27.0,
+      "status": "Moving",
+      "address": "Fabriksvej 48D, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:39:43",
+      "latitude": 55.226322,
+      "longitude": 11.748703,
+      "distance_to_home_m": 123.3,
+      "speed": 13.0,
+      "status": "Moving",
+      "address": "Marskvej 2, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:40:43",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:41:29",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:42:21",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Moving",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:42:28",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Stop",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:44:38",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:44:40",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:45:33",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:45:42",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    },
+    {
+      "timestamp": "2026-04-02 13:46:36",
+      "latitude": 55.225517,
+      "longitude": 11.747365,
+      "distance_to_home_m": 0.0,
+      "speed": 0.0,
+      "status": "Paused",
+      "address": "Marskvej 4, 4700 Næstved, Danmark",
+      "inside_home_zone": true
+    }
+  ],
+  "movia_correction_text": "Dato: 02-04-2026\nLøbenummer: 0170/0198\nOrdre: 1689\nStoppesteder: 50-69 (8 stop)\nStarttid: 10:37\nSluttid: 13:39\nArbejdstid i alt: 182 minutter\nAntal forløb: 1\nSluttid er fastsat efter: Første gyldige indkørsel i hjemmezone\nForklaring:\nStarttid er sat til det tidspunkt, hvor bilen forlader hjemmezonen efter stabil udkørsel.\nSluttid er sat til første gyldige indkørsel i hjemmezonen og ikke til sidste GPS-punkt.\nSystemet fandt 1 forløb på dagen baseret på udkørsel og hjemkomst."
+}
