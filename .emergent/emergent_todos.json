@@ -1,11 +1,11 @@
 [
   {
     "content": "Phase 1: Obtain and validate sample GPS and WebTrack files for POC",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 1: Build isolated parsing and segmentation POC for messy files and home-zone logic",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 1: Run POC against sample files and tune thresholds until results are reliable",
