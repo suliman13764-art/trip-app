@@ -16,6 +16,14 @@
     "status": "in_progress"
   },
   {
+    "content": "Phase 2: Follow design guidelines and implement all user stories in UI and backend",
+    "status": "in_progress"
+  },
+  {
+    "content": "Phase 2: Verify app services start cleanly after implementation",
+    "status": "in_progress"
+  },
+  {
     "content": "Phase 2: End-to-end testing using Testing Agent",
     "status": "pending"
   }

@@ -422,8 +422,8 @@ def detect_segments(
     home_latitude: float,
     home_longitude: float,
     radius_meters: float = 300,
-    min_departure_points: int = 2,
-    min_return_points: int = 2,
+    min_departure_points: int = 3,
+    min_return_points: int = 3,
     min_return_dwell_minutes: int = 10,
 ) -> tuple[list[Segment], dict[str, Any]]:
     if not points:
@@ -535,22 +535,34 @@ def estimate_fallback_end(
     webtrack_summary: dict[str, Any],
     home_latitude: float,
     home_longitude: float,
+    last_order_latitude: float | None = None,
+    last_order_longitude: float | None = None,
 ) -> dict[str, Any] | None:
     last_order = webtrack_summary.get("last_order_with_address")
     if last_order:
         base_time = last_order["timestamp"]
-        nearest_point = min(points, key=lambda point: abs((point.timestamp - base_time).total_seconds()))
-        distance_home = haversine_meters(
-            nearest_point.latitude,
-            nearest_point.longitude,
-            home_latitude,
-            home_longitude,
-        )
+        if last_order_latitude is not None and last_order_longitude is not None:
+            distance_home = haversine_meters(
+                last_order_latitude,
+                last_order_longitude,
+                home_latitude,
+                home_longitude,
+            )
+            method = "last_order_address_plus_estimated_travel"
+        else:
+            nearest_point = min(points, key=lambda point: abs((point.timestamp - base_time).total_seconds()))
+            distance_home = haversine_meters(
+                nearest_point.latitude,
+                nearest_point.longitude,
+                home_latitude,
+                home_longitude,
+            )
+            method = "last_order_time_plus_estimated_travel_from_nearest_gps_point"
         avg_speed_kmh = 35
         travel_minutes = max(5, round((distance_home / 1000) / avg_speed_kmh * 60))
         estimated_end = base_time + timedelta(minutes=travel_minutes)
         return {
-            "method": "last_order_time_plus_estimated_travel_from_nearest_gps_point",
+            "method": method,
             "timestamp": estimated_end,
             "estimated_travel_minutes": travel_minutes,
             "distance_home_m": round(distance_home, 1),
@@ -620,6 +632,9 @@ def analyze_day(
     home_longitude: float | None = None,
     radius_meters: float = 300,
     min_return_dwell_minutes: int = 10,
+    stable_point_count: int = 3,
+    last_order_latitude: float | None = None,
+    last_order_longitude: float | None = None,
 ) -> dict[str, Any]:
     gps_points = parse_gps_file(gps_path)
     webtrack_records = parse_webtrack_file(webtrack_path)
@@ -634,6 +649,8 @@ def analyze_day(
         home_latitude=home_latitude,
         home_longitude=home_longitude,
         radius_meters=radius_meters,
+        min_departure_points=stable_point_count,
+        min_return_points=stable_point_count,
         min_return_dwell_minutes=min_return_dwell_minutes,
     )
 
@@ -641,10 +658,23 @@ def analyze_day(
     end_time_basis_label = "Første gyldige indkørsel i hjemmezone"
     estimation_note = None
     fallback = None
+    needs_order_geocode = False
     if segments:
         final_segments = segments
     else:
-        fallback = estimate_fallback_end(gps_points, webtrack_summary, home_latitude, home_longitude)
+        fallback = estimate_fallback_end(
+            gps_points,
+            webtrack_summary,
+            home_latitude,
+            home_longitude,
+            last_order_latitude=last_order_latitude,
+            last_order_longitude=last_order_longitude,
+        )
+        needs_order_geocode = bool(
+            webtrack_summary.get("last_order_with_address")
+            and last_order_latitude is None
+            and last_order_longitude is None
+        )
         if fallback:
             fallback_segment = Segment(
                 start_time=gps_points[0].timestamp,
@@ -674,6 +704,8 @@ def analyze_day(
             "longitude": round(home_longitude, 6),
             "radius_meters": radius_meters,
             "source": home_source,
+            "stable_point_count": stable_point_count,
+            "return_dwell_minutes": min_return_dwell_minutes,
         },
         "gps_summary": {
             "point_count": len(gps_points),
@@ -714,6 +746,7 @@ def analyze_day(
         "total_work_minutes": total_work_minutes,
         "end_time_basis_label": end_time_basis_label,
         "estimation_note": estimation_note,
+        "needs_order_geocode": needs_order_geocode,
         "segment_debug": segment_debug,
         "fallback": {
             **fallback,

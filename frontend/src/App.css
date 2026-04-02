@@ -1,34 +1,42 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+body {
+  color: hsl(var(--foreground));
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.AppShell {
+  min-height: 100vh;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.app-header {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid hsl(var(--border));
+  background: linear-gradient(90deg, hsl(186 72% 28% / 0.12), transparent 35%, hsl(43 74% 52% / 0.1));
 }
 
-.App-link {
-    color: #61dafb;
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='0.08'/></svg>");
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.map-canvas .leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  font-family: "Inter", sans-serif;
+}
+
+.map-canvas .leaflet-control-attribution {
+  background: hsl(var(--card));
+  border-radius: 0.5rem;
+}
+
+.section-anchor {
+  scroll-margin-top: 96px;
+}
+
+.kpi-highlight {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.18);
 }

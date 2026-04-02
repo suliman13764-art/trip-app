@@ -15,6 +15,7 @@ def main() -> None:
     parser.add_argument("--webtrack", required=True, help="Path to WebTrack PDF/XLSX file")
     parser.add_argument("--radius", type=float, default=300, help="Home zone radius in meters")
     parser.add_argument("--dwell", type=int, default=10, help="Valid return dwell in minutes")
+    parser.add_argument("--stable-points", type=int, default=3, help="Consecutive inside/outside points needed to confirm transitions")
     parser.add_argument("--home-lat", type=float, default=None, help="Optional selected home latitude")
     parser.add_argument("--home-lon", type=float, default=None, help="Optional selected home longitude")
     parser.add_argument(
@@ -31,6 +32,7 @@ def main() -> None:
         home_longitude=args.home_lon,
         radius_meters=args.radius,
         min_return_dwell_minutes=args.dwell,
+        stable_point_count=args.stable_points,
     )
     dump_json(result, args.output)
 
