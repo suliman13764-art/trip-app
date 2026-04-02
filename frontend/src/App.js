@@ -26,6 +26,7 @@ import { LoginScreen } from "@/components/LoginScreen";
 import { PrivateTripManager } from "@/components/PrivateTripManager";
 import { QualityDebugPanel } from "@/components/QualityDebugPanel";
 import { ResultsKPIGrid } from "@/components/ResultsKPIGrid";
+import { RunExplanationPanel } from "@/components/RunExplanationPanel";
 import { SegmentsTable } from "@/components/SegmentsTable";
 import { WorkflowStepper } from "@/components/WorkflowStepper";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -688,6 +689,7 @@ function App() {
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
               <div className="space-y-6 xl:col-span-8">
+                <RunExplanationPanel analysis={analysis} />
                 <SegmentsTable analysis={analysis} highlightedSegmentIndex={highlightedSegmentIndex} onHighlightSegment={setHighlightedSegmentIndex} onCopySegment={handleCopySegment} />
               </div>
               <div className="xl:col-span-4">

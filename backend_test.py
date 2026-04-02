@@ -74,7 +74,7 @@ class MoviaAPITester:
             "POST", 
             "auth/login", 
             200,
-            data={"username": "owner", "password": "Owner123!"}
+            data={"username": "ahabus", "password": "71897382"}
         )
         
         if success and result:
@@ -250,6 +250,8 @@ class MoviaAPITester:
             
             if success and result:
                 self.validate_analysis_results(result)
+                self.validate_settlement_summary(result)
+                self.validate_delay_analysis(result)
             
             return success, result
             
@@ -384,6 +386,76 @@ class MoviaAPITester:
             print("✅ End time based on first valid home-zone entry")
         else:
             print(f"❌ End time basis: {end_basis}")
+
+    def validate_settlement_summary(self, result):
+        """Validate settlement summary extraction from V.LØBE SLUT"""
+        print("\n💰 Validating Settlement Summary:")
+        
+        settlement = result.get("settlement_summary", {})
+        
+        # Expected values from the review request
+        expected_values = {
+            "drive_city_minutes": 5,
+            "drive_land_minutes": 162,
+            "total_drive_minutes": 167,
+            "wait_city_minutes": 14,
+            "wait_land_minutes": 5,
+            "total_wait_minutes": 19,
+            "afregnet_minutes": 186,
+            "desired_minutes": 182,
+            "difference_minutes": -4
+        }
+        
+        for key, expected in expected_values.items():
+            actual = settlement.get(key)
+            if actual == expected:
+                print(f"✅ {key}: {actual} (matches expected)")
+            else:
+                print(f"❌ {key}: {actual} (expected: {expected})")
+        
+        # Check if settlement summary is present in correction text
+        correction_text = result.get("movia_correction_text", "")
+        settlement_keywords = ["Køretid i alt", "Ventetid i alt", "Afregnet min.", "Ønsket afregnet", "Difference"]
+        
+        found_keywords = [kw for kw in settlement_keywords if kw in correction_text]
+        if len(found_keywords) >= 4:
+            print(f"✅ Settlement summary present in correction text ({len(found_keywords)}/5 keywords found)")
+        else:
+            print(f"❌ Settlement summary missing from correction text ({len(found_keywords)}/5 keywords found)")
+
+    def validate_delay_analysis(self, result):
+        """Validate delay analysis functionality"""
+        print("\n⏰ Validating Delay Analysis:")
+        
+        delay_summary = result.get("delay_summary", {})
+        stop_delays = delay_summary.get("stop_delay_analysis", [])
+        main_delay = delay_summary.get("main_delay")
+        
+        if stop_delays:
+            print(f"✅ Stop delay analysis present ({len(stop_delays)} stops analyzed)")
+            
+            # Check for expected main delay at stop 50
+            if main_delay:
+                stop_num = main_delay.get("stop_number")
+                delay_mins = main_delay.get("delay_only_minutes")
+                reason = main_delay.get("reason")
+                
+                if stop_num == 50 and delay_mins == 9 and "waiting time at stop" in reason:
+                    print(f"✅ Main delay correctly identified: Stop {stop_num}, {delay_mins} min, {reason}")
+                else:
+                    print(f"❌ Main delay mismatch: Stop {stop_num}, {delay_mins} min, {reason}")
+                    print(f"   Expected: Stop 50, 9 min, waiting time at stop")
+            else:
+                print("❌ Main delay not identified")
+        else:
+            print("❌ No stop delay analysis found")
+        
+        # Check if delay analysis is in correction text
+        correction_text = result.get("movia_correction_text", "")
+        if main_delay and "Forsinkelse vurderes primært" in correction_text:
+            print("✅ Delay explanation present in correction text")
+        else:
+            print("❌ Delay explanation missing from correction text")
 
     def test_analyze_endpoint_validation(self):
         """Test analyze endpoint validation"""

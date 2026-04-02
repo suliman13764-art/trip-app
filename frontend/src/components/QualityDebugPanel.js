@@ -47,6 +47,8 @@ export const QualityDebugPanel = ({ analysis }) => {
                   <li>• Radius: {analysis?.home_center?.radius_meters || "--"} m</li>
                   <li>• Stable points: {analysis?.home_center?.stable_point_count || "--"}</li>
                   <li>• Dwell rule: {analysis?.home_center?.return_dwell_minutes || "--"} minutes</li>
+                  <li>• Afregnet min. from summary: {analysis?.settlement_summary?.afregnet_minutes ?? "--"}</li>
+                  <li>• Ønsket afregnet: {analysis?.settlement_summary?.desired_minutes ?? "--"}</li>
                 </ul>
               </div>
               <div className="rounded-2xl border bg-[hsl(var(--surface-2))] p-4">
@@ -54,6 +56,9 @@ export const QualityDebugPanel = ({ analysis }) => {
                 <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                   {analysis?.needs_order_geocode ? <li>• Browser geocoding can refine the last-order fallback if GPS return is missing.</li> : null}
                   {analysis?.estimation_note ? <li>• {analysis.estimation_note}</li> : <li>• No estimation warning for this analysis.</li>}
+                  {analysis?.delay_summary?.main_delay ? (
+                    <li>• Main delay at stop {analysis.delay_summary.main_delay.stop_number}: {analysis.delay_summary.main_delay.delay_only_minutes} min ({analysis.delay_summary.main_delay.reason}).</li>
+                  ) : null}
                   {!rejected.length ? <li>• No rejected return streaks for this run.</li> : null}
                 </ul>
               </div>

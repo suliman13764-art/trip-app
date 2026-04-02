@@ -30,7 +30,10 @@ POSTAL_ADDRESS_RE = re.compile(
     r"PN:(\d{4})\s+(.+?)(?=\s+(?:OBS|INTET|Tlf\.?|tlf\.?|\(\d{2}:\d{2}\)|\d+\s+PER|FLERE\s+STOP|$))"
 )
 TIME_IN_TEXT_RE = re.compile(r"\b\d{1,2}:\d{2}\b")
+SUMMARY_DRIVE_RE = re.compile(r"Køretid by:\s*(\d+)\s+Land:\s*(\d+)")
+SUMMARY_WAIT_RE = re.compile(r"Ventetid by:\s*(\d+)\s+Land:\s*(\d+)")
 WORK_MESSAGE_TYPES = {"route_end", "drive_home", "bag", "aflev", "aflev/bag", "general"}
+STOP_ADDRESS_SIMILARITY_MIN = 0.25
 
 
 @dataclass
@@ -329,6 +332,33 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
             for match in stop_matches
             if match["action"] == "AFLEV" and match["completion_datetime"] is not None
         ]
+        drive_summary_match = SUMMARY_DRIVE_RE.search(raw_text)
+        wait_summary_match = SUMMARY_WAIT_RE.search(raw_text)
+        final_summary = None
+        if drive_summary_match or wait_summary_match:
+            final_summary = {
+                "drive_city_minutes": int(drive_summary_match.group(1)) if drive_summary_match else 0,
+                "drive_land_minutes": int(drive_summary_match.group(2)) if drive_summary_match else 0,
+                "wait_city_minutes": int(wait_summary_match.group(1)) if wait_summary_match else 0,
+                "wait_land_minutes": int(wait_summary_match.group(2)) if wait_summary_match else 0,
+            }
+            final_summary["total_drive_minutes"] = final_summary["drive_city_minutes"] + final_summary["drive_land_minutes"]
+            final_summary["total_wait_minutes"] = final_summary["wait_city_minutes"] + final_summary["wait_land_minutes"]
+            final_summary["afregnet_minutes"] = final_summary["total_drive_minutes"] + final_summary["total_wait_minutes"]
+
+        stop_events = [
+            {
+                "stop_number": int(match["stop_number"]) if str(match["stop_number"]).isdigit() else match["stop_number"],
+                "action": match["action"],
+                "planned_time": match["planned_time"],
+                "planned_datetime": match["completion_datetime"],
+                "record_timestamp": current["timestamp"],
+                "address": extracted_address,
+                "order_number": order_number,
+                "raw_text": raw_text,
+            }
+            for match in stop_matches
+        ]
 
         records.append(
             {
@@ -336,6 +366,7 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
                 "raw_text": raw_text,
                 "run_numbers": run_numbers,
                 "stop_matches": stop_matches,
+                "stop_events": stop_events,
                 "notice_stops": notice_stops,
                 "order_number": order_number,
                 "message_type": message_type,
@@ -344,6 +375,7 @@ def parse_webtrack_file(file_path: str | Path) -> list[dict[str, Any]]:
                 "extracted_address": extracted_address,
                 "service_times": sorted(set(TIME_IN_TEXT_RE.findall(raw_text))),
                 "completion_times": completion_times,
+                "final_summary": final_summary,
                 "is_meaningful": message_type != "new_order",
             }
         )
@@ -373,9 +405,9 @@ def summarize_webtrack(records: list[dict[str, Any]]) -> dict[str, Any]:
             int(match["stop_number"])
             for record in records
             for match in record["stop_matches"]
-            if match["stop_number"].isdigit()
+            if str(match["stop_number"]).isdigit()
         }
-        | {int(stop) for record in records for stop in record["notice_stops"] if stop.isdigit()}
+        | {int(stop) for record in records for stop in record["notice_stops"] if str(stop).isdigit()}
     )
     primary_order_numbers = [record["order_number"] for record in records if record["order_number"]]
     primary_order = max(set(primary_order_numbers), key=primary_order_numbers.count) if primary_order_numbers else None
@@ -418,6 +450,10 @@ def summarize_webtrack(records: list[dict[str, Any]]) -> dict[str, Any]:
         for record in records
         if record["message_type"] in WORK_MESSAGE_TYPES
     ]
+    stop_events = [event for record in records for event in record.get("stop_events", []) if event.get("planned_datetime")]
+    stop_events.sort(key=lambda event: event["planned_datetime"])
+    final_summary_record = next((record for record in reversed(records) if record.get("final_summary")), None)
+    final_summary = final_summary_record.get("final_summary") if final_summary_record else None
 
     return {
         "run_numbers": run_numbers,
@@ -433,8 +469,132 @@ def summarize_webtrack(records: list[dict[str, Any]]) -> dict[str, Any]:
         "drive_home_messages": [record for record in records if record["contains_drive_home"]],
         "completion_events": completion_events,
         "meaningful_event_times": meaningful_event_times,
+        "stop_events": stop_events,
+        "final_summary": final_summary,
+        "final_summary_record_time": final_summary_record["timestamp"] if final_summary_record else None,
     }
 
+
+def _normalize_address_tokens(value: str | None) -> set[str]:
+    if not value:
+        return set()
+    normalized = value.lower().replace("æ", "ae").replace("ø", "oe").replace("å", "aa")
+    tokens = set(re.findall(r"[a-z0-9]+", normalized))
+    ignored = {"danmark", "pn", "tv", "st", "th", "sal", "vej", "gade"}
+    return {token for token in tokens if token not in ignored and len(token) > 1}
+
+
+def _address_similarity(left: str | None, right: str | None) -> float:
+    left_tokens = _normalize_address_tokens(left)
+    right_tokens = _normalize_address_tokens(right)
+    if not left_tokens or not right_tokens:
+        return 0.0
+    intersection = left_tokens & right_tokens
+    union = left_tokens | right_tokens
+    return len(intersection) / max(1, len(union))
+
+
+def infer_actual_stop_timing(stop_event: dict[str, Any], gps_points: list[GPSPoint]) -> dict[str, Any]:
+    planned_datetime = stop_event.get("planned_datetime")
+    if planned_datetime is None:
+        return {
+            "actual_datetime": None,
+            "delay_minutes": None,
+            "confidence": "low",
+            "reason_basis": "Missing planned stop time",
+            "matched_gps_point": None,
+            "stationary_minutes": 0,
+        }
+
+    candidates: list[tuple[float, float, GPSPoint]] = []
+    for point in gps_points:
+        time_diff = abs((point.timestamp - planned_datetime).total_seconds()) / 60
+        if time_diff > 240:
+            continue
+        similarity = _address_similarity(stop_event.get("address"), point.address)
+        if similarity < STOP_ADDRESS_SIMILARITY_MIN and time_diff > 45:
+            continue
+        speed_penalty = 0 if (point.speed is not None and point.speed <= 10) or point.status.lower() in {"stop", "paused", "parked"} else 6
+        score = similarity * 100 - time_diff - speed_penalty
+        candidates.append((score, time_diff, point))
+
+    matched_point = max(candidates, key=lambda item: item[0])[2] if candidates else min(
+        gps_points,
+        key=lambda point: abs((point.timestamp - planned_datetime).total_seconds()),
+    )
+    similarity = _address_similarity(stop_event.get("address"), matched_point.address)
+    neighborhood = [
+        point
+        for point in gps_points
+        if abs((point.timestamp - matched_point.timestamp).total_seconds()) <= 15 * 60
+        and ((point.speed is not None and point.speed <= 5) or point.status.lower() in {"stop", "paused", "parked"})
+    ]
+    stationary_minutes = 0
+    if neighborhood:
+        stationary_minutes = max(0, round((neighborhood[-1].timestamp - neighborhood[0].timestamp).total_seconds() / 60))
+
+    delay_minutes = round((matched_point.timestamp - planned_datetime).total_seconds() / 60)
+    confidence = "high" if similarity >= 0.45 else "medium" if similarity >= 0.25 else "low"
+    reason_basis = f"GPS address match {similarity:.2f}; stationary {stationary_minutes} min"
+    return {
+        "actual_datetime": matched_point.timestamp,
+        "delay_minutes": delay_minutes,
+        "confidence": confidence,
+        "reason_basis": reason_basis,
+        "matched_gps_point": _point_to_dict(matched_point),
+        "stationary_minutes": stationary_minutes,
+    }
+
+
+def analyze_delay_points(webtrack_summary: dict[str, Any], gps_points: list[GPSPoint]) -> dict[str, Any]:
+    stop_delay_analysis: list[dict[str, Any]] = []
+    previous_actual = None
+    previous_planned = None
+
+    for stop_event in webtrack_summary.get("stop_events", []):
+        inferred = infer_actual_stop_timing(stop_event, gps_points)
+        actual_datetime = inferred["actual_datetime"]
+        planned_datetime = stop_event.get("planned_datetime")
+        delay_minutes = inferred["delay_minutes"]
+        reason = "No major delay detected"
+        if delay_minutes is None:
+            reason = "Insufficient data"
+        elif delay_minutes > 5:
+            if inferred["stationary_minutes"] >= 5:
+                reason = "waiting time at stop"
+            elif previous_actual and previous_planned:
+                planned_gap = (planned_datetime - previous_planned).total_seconds() / 60
+                actual_gap = (actual_datetime - previous_actual).total_seconds() / 60 if actual_datetime else planned_gap
+                reason = "sequence gap between stops" if actual_gap - planned_gap > 10 else "traffic / travel time"
+            else:
+                reason = "traffic / travel time"
+        elif delay_minutes < -5:
+            reason = "ahead of planned stop time"
+
+        record = {
+            "stop_number": stop_event.get("stop_number"),
+            "stop_type": stop_event.get("action"),
+            "planned_time": planned_datetime.isoformat(sep=" ") if planned_datetime else None,
+            "actual_time": actual_datetime.isoformat(sep=" ") if actual_datetime else None,
+            "delay_minutes": delay_minutes,
+            "delay_only_minutes": max(0, delay_minutes) if delay_minutes is not None else None,
+            "reason": reason,
+            "confidence": inferred["confidence"],
+            "address": stop_event.get("address"),
+            "reason_basis": inferred["reason_basis"],
+            "matched_gps_point": inferred["matched_gps_point"],
+        }
+        stop_delay_analysis.append(record)
+        previous_actual = actual_datetime or previous_actual
+        previous_planned = planned_datetime or previous_planned
+
+    significant = [item for item in stop_delay_analysis if (item.get("delay_only_minutes") or 0) > 5]
+    main_delay = max(significant, key=lambda item: item["delay_only_minutes"]) if significant else None
+    return {
+        "stop_delay_analysis": stop_delay_analysis,
+        "main_delay": main_delay,
+        "significant_delays": significant,
+    }
 
 
 def derive_home_center_for_poc(points: list[GPSPoint]) -> tuple[float, float, str]:
@@ -785,6 +945,8 @@ def generate_movia_correction_text(result: dict[str, Any]) -> str:
     order_number = result["webtrack_summary"]["primary_order_number"] or "Ikke fundet i filen"
     stop_numbers = result["webtrack_summary"]["stop_numbers"]
     stop_text = f"{stop_numbers[0]}-{stop_numbers[-1]} ({len(stop_numbers)} stop)" if stop_numbers else "Ikke fundet i filen"
+    settlement = result.get("settlement_summary") or {}
+    delay_summary = result.get("delay_summary") or {}
 
     lines = [
         f"Dato: {work_date}",
@@ -797,11 +959,27 @@ def generate_movia_correction_text(result: dict[str, Any]) -> str:
         f"Antal forløb: {segment_count}",
         f"Sluttid er fastsat efter: {result['end_time_basis_label']}",
     ]
+    if settlement:
+        lines.extend(
+            [
+                f"Køretid i alt (by + land): {settlement.get('total_drive_minutes', 'Ikke oplyst')} minutter",
+                f"Ventetid i alt (by + land): {settlement.get('total_wait_minutes', 'Ikke oplyst')} minutter",
+                f"Afregnet min.: {settlement.get('afregnet_minutes', 'Ikke oplyst')}",
+                f"Ønsket afregnet: {settlement.get('desired_minutes', 'Ikke oplyst')}",
+                f"Difference: {settlement.get('difference_minutes', 'Ikke oplyst')} minutter",
+            ]
+        )
     if result.get("estimation_note"):
         lines.append(f"Bemærkning: {result['estimation_note']}")
     for private_trip in result.get("private_trips", []):
         lines.append(
             f"Privat kørsel fra {private_trip['start_time'][11:16]} til {private_trip['end_time'][11:16]} er fratrukket arbejdstiden."
+        )
+
+    main_delay = delay_summary.get("main_delay")
+    if main_delay:
+        lines.append(
+            f"Forsinkelse vurderes primært ved stop {main_delay['stop_number']} ({main_delay['stop_type']}), ca. {main_delay['delay_only_minutes']} minutter. Årsag: {main_delay['reason']}."
         )
 
     lines.extend(
@@ -901,6 +1079,18 @@ def analyze_day(
         for segment in final_segments
         if segment.end_time
     )
+    settlement_source = webtrack_summary.get("final_summary") or {}
+    settlement_summary = {
+        **settlement_source,
+        "desired_minutes": total_work_minutes if final_segments else None,
+        "difference_minutes": (total_work_minutes - settlement_source.get("afregnet_minutes"))
+        if settlement_source.get("afregnet_minutes") is not None and final_segments
+        else None,
+        "summary_record_time": webtrack_summary.get("final_summary_record_time").isoformat(sep=" ")
+        if webtrack_summary.get("final_summary_record_time")
+        else None,
+    }
+    delay_summary = analyze_delay_points(webtrack_summary, gps_points)
     segment_debug["private_trip_overrides_count"] = len(normalized_private_trips)
     segment_debug["segment_adjustments"] = segment_adjustments
 
@@ -925,6 +1115,7 @@ def analyze_day(
             "stop_numbers": webtrack_summary["stop_numbers"],
             "stop_count": webtrack_summary["stop_count"],
             "v_lobe_slut_times": webtrack_summary["v_lobe_slut_times"],
+            "final_summary": settlement_source,
             "last_meaningful_event_time": webtrack_summary["last_meaningful_event"]["timestamp"].isoformat(sep=" ") if webtrack_summary["last_meaningful_event"] else None,
             "last_meaningful_event_text": webtrack_summary["last_meaningful_event"]["raw_text"] if webtrack_summary["last_meaningful_event"] else None,
             "last_order_with_address": {
@@ -951,6 +1142,8 @@ def analyze_day(
         ],
         "private_trips": applied_private_trips,
         "private_trip_suggestions": [],
+        "settlement_summary": settlement_summary,
+        "delay_summary": delay_summary,
         "computed_start_time": computed_start.strftime("%H:%M") if computed_start else None,
         "computed_end_time": computed_end.strftime("%H:%M") if computed_end else None,
         "total_work_minutes": total_work_minutes if final_segments else None,

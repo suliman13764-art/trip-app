@@ -1,14 +1,18 @@
 [
   {
-    "content": "Phase 5: Replace seeded owner/admin credentials with requested ahabus account",
+    "content": "Phase 6: Extend WebTrack parser to extract final V.LØBE SLUT driving/waiting totals and settlement metrics",
     "status": "completed"
   },
   {
-    "content": "Phase 5: Remove login password autofill requirement",
+    "content": "Phase 6: Implement delay detection using planned stop times plus GPS actual timing heuristics",
     "status": "completed"
   },
   {
-    "content": "Phase 5: Verify new owner login and old owner deactivation",
+    "content": "Phase 6: Surface settlement and delay explanation in dashboard and Danish correction text",
     "status": "completed"
+  },
+  {
+    "content": "Phase 6: End-to-end testing using Testing Agent for summary totals and delay output",
+    "status": "in_progress"
   }
 ]

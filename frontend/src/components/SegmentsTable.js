@@ -55,7 +55,7 @@ export const SegmentsTable = ({ analysis, onHighlightSegment, highlightedSegment
                     <TableCell className="font-mono text-xs">{segment.start_time}</TableCell>
                     <TableCell className="font-mono text-xs">{segment.end_time || "Awaiting end"}</TableCell>
                     <TableCell>{durationBetween(segment.start_time, segment.end_time)}</TableCell>
-                    <TableCell>{analysis?.webtrack_summary?.stop_numbers?.join(", ") || "Ikke oplyst"}</TableCell>
+                    <TableCell>{segment.stops?.length ? segment.stops.join(", ") : "Ikke oplyst"}</TableCell>
                     <TableCell className="font-mono text-xs">{analysis?.webtrack_summary?.primary_run_number || "Ikke oplyst"}</TableCell>
                     <TableCell>
                       <Badge variant={segment.is_estimated_end ? "secondary" : "outline"}>
