@@ -60,8 +60,8 @@ async def ensure_indexes_and_seed() -> None:
     existing_count = await users_collection.count_documents({})
     if existing_count:
         return
-    username = os.environ.get("DEFAULT_ADMIN_USERNAME", "owner")
-    password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "Owner123!")
+    username = os.environ.get("DEFAULT_ADMIN_USERNAME", "ahabus").strip()
+password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "71897382").strip()[:72]
     now = datetime.now(timezone.utc)
     await users_collection.insert_one(
         {
