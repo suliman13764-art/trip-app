@@ -57,13 +57,15 @@ class UpdateUserRequest(BaseModel):
 
 async def ensure_indexes_and_seed() -> None:
     await users_collection.create_index("username", unique=True)
-    existing_count = await users_collection.count_documents({})
-    if existing_count:
+existing_count = await users_collection.count_documents({})
+if existing_count:
         return
-    username = os.environ.get("DEFAULT_ADMIN_USERNAME", "ahabus").strip()
+
+username = os.environ.get("DEFAULT_ADMIN_USERNAME", "ahabus").strip()
 password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "71897382").strip()[:72]
-    now = datetime.now(timezone.utc)
-    await users_collection.insert_one(
+now = datetime.now(timezone.utc)
+
+await users_collection.insert_one(
         {
             "username": username,
             "password_hash": hash_password(password),
@@ -73,7 +75,7 @@ password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "71897382").strip()[:72]
             "last_login_at": None,
         }
     )
-    logger.info("Seeded default owner/admin account: %s", username)
+logger.info("Seeded default owner/admin account: %s", username)
 
 
 @app.on_event("startup")
