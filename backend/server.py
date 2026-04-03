@@ -1,4 +1,4 @@
-from __future__ import annotations
+from _future_ import annotations
 
 import json
 import logging
@@ -18,13 +18,18 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 
 from analysis_core import analyze_day
-from auth_utils import create_access_token, decode_access_token, hash_password, serialize_user, verify_password
+from auth_utils import (
+    create_access_token,
+    decode_access_token,
+    hash_password,
+    serialize_user,
+    verify_password,
+)
 
-
-ROOT_DIR = Path(__file__).parent
+ROOT_DIR = Path(_file_).parent
 load_dotenv(ROOT_DIR / ".env")
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(_name_)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 app = FastAPI(title="Trip Segment Correction API")
@@ -32,6 +37,9 @@ api_router = APIRouter(prefix="/api")
 auth_scheme = HTTPBearer(auto_error=False)
 
 mongo_url = os.environ.get("MONGO_URL")
+if not mongo_url:
+    raise RuntimeError("MONGO_URL environment variable is missing")
+
 db_name = os.environ.get("DB_NAME", "trip_segment_app")
 client = AsyncIOMotorClient(mongo_url)
 db = client[db_name]
@@ -57,15 +65,16 @@ class UpdateUserRequest(BaseModel):
 
 async def ensure_indexes_and_seed() -> None:
     await users_collection.create_index("username", unique=True)
-existing_count = await users_collection.count_documents({})
-if existing_count:
+
+    existing_count = await users_collection.count_documents({})
+    if existing_count:
         return
 
-username = os.environ.get("DEFAULT_ADMIN_USERNAME", "ahabus").strip()
-password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "71897382").strip()[:72]
-now = datetime.now(timezone.utc)
+    username = os.environ.get("DEFAULT_ADMIN_USERNAME", "ahabus").strip()
+    password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "71897382").strip()[:72]
+    now = datetime.now(timezone.utc)
 
-await users_collection.insert_one(
+    await users_collection.insert_one(
         {
             "username": username,
             "password_hash": hash_password(password),
@@ -75,7 +84,7 @@ await users_collection.insert_one(
             "last_login_at": None,
         }
     )
-logger.info("Seeded default owner/admin account: %s", username)
+    logger.info("Seeded default owner/admin account: %s", username)
 
 
 @app.on_event("startup")
@@ -88,18 +97,28 @@ async def shutdown_event() -> None:
     client.close()
 
 
-async def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(auth_scheme)) -> dict[str, Any]:
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(auth_scheme),
+) -> dict[str, Any]:
     if credentials is None:
         raise HTTPException(status_code=401, detail="Authentication required")
-    payload = decode_access_token(credentials.credentials)
+
+    try:
+        payload = decode_access_token(credentials.credentials)
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail="Invalid or expired token") from exc
+
     username = payload.get("sub")
     user = await users_collection.find_one({"username": username})
     if not user or not user.get("is_active", True):
         raise HTTPException(status_code=401, detail="Account is inactive or missing")
+
     return user
 
 
-async def require_admin(current_user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
+async def require_admin(
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
     if current_user.get("role") not in {"owner", "admin"}:
         raise HTTPException(status_code=403, detail="Owner/Admin access required")
     return current_user
@@ -131,6 +150,7 @@ async def login(payload: LoginRequest) -> JSONResponse:
     user = await users_collection.find_one({"username": payload.username})
     if not user or not verify_password(payload.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid username or password")
+
     if not user.get("is_active", True):
         raise HTTPException(status_code=403, detail="This account is deactivated")
 
@@ -138,9 +158,16 @@ async def login(payload: LoginRequest) -> JSONResponse:
         {"_id": user["_id"]},
         {"$set": {"last_login_at": datetime.now(timezone.utc)}},
     )
-    token = create_access_token(user["username"], user["role"])
     refreshed_user = await users_collection.find_one({"_id": user["_id"]})
-    return JSONResponse({"access_token": token, "token_type": "bearer", "user": serialize_user(refreshed_user)})
+    token = create_access_token(user["username"], user["role"])
+
+    return JSONResponse(
+        {
+            "access_token": token,
+            "token_type": "bearer",
+            "user": serialize_user(refreshed_user),
+        }
+    )
 
 
 @api_router.get("/auth/me")
@@ -155,8 +182,12 @@ async def list_users(_: dict[str, Any] = Depends(require_admin)) -> JSONResponse
 
 
 @api_router.post("/admin/users")
-async def create_user(payload: CreateUserRequest, current_user: dict[str, Any] = Depends(require_admin)) -> JSONResponse:
+async def create_user(
+    payload: CreateUserRequest,
+    current_user: dict[str, Any] = Depends(require_admin),
+) -> JSONResponse:
     role = payload.role if payload.role in {"owner", "admin", "user"} else "user"
+
     existing = await users_collection.find_one({"username": payload.username})
     if existing:
         raise HTTPException(status_code=400, detail="Username already exists")
@@ -165,7 +196,7 @@ async def create_user(payload: CreateUserRequest, current_user: dict[str, Any] =
     result = await users_collection.insert_one(
         {
             "username": payload.username,
-            "password_hash": hash_password(payload.password),
+            "password_hash": hash_password(payload.password[:72]),
             "role": role,
             "is_active": True,
             "created_at": now,
@@ -173,6 +204,7 @@ async def create_user(payload: CreateUserRequest, current_user: dict[str, Any] =
         }
     )
     created_user = await users_collection.find_one({"_id": result.inserted_id})
+
     await admin_logs_collection.insert_one(
         {
             "actor_username": current_user["username"],
@@ -181,19 +213,25 @@ async def create_user(payload: CreateUserRequest, current_user: dict[str, Any] =
             "timestamp": now,
         }
     )
+
     return JSONResponse({"user": serialize_user(created_user)})
 
 
 @api_router.patch("/admin/users/{user_id}")
-async def update_user(user_id: str, payload: UpdateUserRequest, current_user: dict[str, Any] = Depends(require_admin)) -> JSONResponse:
+async def update_user(
+    user_id: str,
+    payload: UpdateUserRequest,
+    current_user: dict[str, Any] = Depends(require_admin),
+) -> JSONResponse:
     try:
         object_id = ObjectId(user_id)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(status_code=400, detail="Invalid user id") from exc
 
     target = await users_collection.find_one({"_id": object_id})
     if not target:
         raise HTTPException(status_code=404, detail="User not found")
+
     if target["username"] == current_user["username"] and payload.is_active is False:
         raise HTTPException(status_code=400, detail="You cannot deactivate your own account")
 
@@ -202,11 +240,13 @@ async def update_user(user_id: str, payload: UpdateUserRequest, current_user: di
         updates["is_active"] = payload.is_active
     if payload.role in {"owner", "admin", "user"}:
         updates["role"] = payload.role
+
     if not updates:
         raise HTTPException(status_code=400, detail="No valid updates supplied")
 
     await users_collection.update_one({"_id": object_id}, {"$set": updates})
     updated = await users_collection.find_one({"_id": object_id})
+
     await admin_logs_collection.insert_one(
         {
             "actor_username": current_user["username"],
@@ -216,6 +256,7 @@ async def update_user(user_id: str, payload: UpdateUserRequest, current_user: di
             "timestamp": datetime.now(timezone.utc),
         }
     )
+
     return JSONResponse({"user": serialize_user(updated)})
 
 
@@ -235,11 +276,14 @@ async def analyze_trip(
 ) -> JSONResponse:
     gps_path = None
     webtrack_path = None
+
     try:
         if Path(gps_file.filename or "").suffix.lower() not in {".csv", ".xlsx", ".xls"}:
             raise HTTPException(status_code=400, detail="GPS file must be CSV or Excel (.xlsx/.xls)")
+
         if Path(webtrack_file.filename or "").suffix.lower() not in {".pdf", ".xlsx", ".xls", ".csv"}:
             raise HTTPException(status_code=400, detail="WebTrack file must be PDF or Excel/CSV")
+
         if radius_m < 200 or radius_m > 500:
             raise HTTPException(status_code=400, detail="Home zone radius must be between 200 and 500 meters")
 
@@ -259,6 +303,7 @@ async def analyze_trip(
             last_order_longitude=last_order_lon,
             private_trip_overrides=trip_overrides,
         )
+
         result["upload_summary"] = {
             "gps_filename": gps_file.filename,
             "webtrack_filename": webtrack_file.filename,
@@ -266,10 +311,12 @@ async def analyze_trip(
             "webtrack_file_type": Path(webtrack_file.filename or "").suffix.lower(),
             "requested_by": current_user["username"],
         }
+
         return JSONResponse(content=result)
+
     except HTTPException:
         raise
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.exception("Analysis failed")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     finally:
