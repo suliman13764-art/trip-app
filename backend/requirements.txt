@@ -3,3 +3,10 @@ uvicorn
 pymongo
 python-dotenv
 motor
+pandas
+openpyxl
+pdfplumber
+python-multipart
+python-jose
+passlib
+bcrypt
