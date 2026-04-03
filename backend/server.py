@@ -26,7 +26,7 @@ from auth_utils import (
     verify_password,
 )
 
-ROOT_DIR = Path(_file_).parent
+ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
 logger = logging.getLogger(_name_)
