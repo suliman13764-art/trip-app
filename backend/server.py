@@ -1,5 +1,6 @@
-print("SERVER STARTING...")
 from __future__ import annotations
+
+print("SERVER STARTING...")
 
 import json
 import logging
