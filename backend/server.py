@@ -1,3 +1,4 @@
+print("SERVER STARTING...")
 from __future__ import annotations
 
 import json
